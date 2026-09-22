@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: hookbuffer-postgres
+    environment:
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_DB: hookbuffer
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hookbuffer"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  # 프로덕션은 ElastiCache Valkey 9.1이다. 마이너까지 맞춰야 Stream/ZSET 동작 차이에
+  # 로컬에서 먼저 걸린다 — 여기 태그를 올리면 Terraform의 engine_version도 같이 올린다.
+  valkey:
+    image: valkey/valkey:9.1-alpine
+    container_name: hookbuffer-valkey
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  valkey_data:

@@ -1,0 +1,23 @@
+{
+	"name": "hookbuffer",
+	"private": true,
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "trap 'pnpm docker:down' EXIT; pnpm docker:up && turbo run dev",
+		"lint": "turbo run lint",
+		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
+		"check-types": "turbo run check-types",
+		"test": "turbo run test",
+		"docker:up": "docker compose -f ./docker-compose.yml up -d --wait",
+		"docker:down": "docker compose -f ./docker-compose.yml down -v"
+	},
+	"devDependencies": {
+		"prettier": "^3.9.4",
+		"turbo": "^2.10.4",
+		"typescript": "6.0.3"
+	},
+	"packageManager": "pnpm@10.13.1",
+	"engines": {
+		"node": ">=24.0.0"
+	}
+}

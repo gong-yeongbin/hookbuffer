@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# pnpm 10은 의존성의 lifecycle script를 기본 차단한다. 네이티브 바이너리를 내려받는
+# 패키지만 여기에 명시해 허용한다 — 빠지면 SWC 바이너리가 없어 Vitest가 기동하지 않는다.
+onlyBuiltDependencies:
+  - "@swc/core"
+  - esbuild
+  - msw
