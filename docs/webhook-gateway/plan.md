@@ -107,7 +107,7 @@ CLI 로컬 터널, 변환 스크립트·필터, 키 기반 순서 보장, 본문
 ## 검증 (전체)
 
 - backend: `pnpm test`(유닛), `pnpm test:e2e`. 통합 시나리오는 docker compose 위에서 실행.
-- frontend: `pnpm test:coverage` 4지표 90%.
+- frontend: `pnpm test` (커버리지 포함, 4지표 90% 미만이면 실패).
 - 루트: `pnpm lint && pnpm check-types && pnpm build`.
 - 배포 후: 실 웹훅 수신 1건 end-to-end, 워커 중단·복구 시 유실 0건.
 

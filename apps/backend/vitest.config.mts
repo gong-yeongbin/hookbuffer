@@ -7,13 +7,13 @@ export default defineConfig({
 		globals: true,
 		environment: 'node',
 		include: ['src/**/*.spec.ts'],
-		// 1단계에는 단위 테스트 대상 로직이 없다. 2단계부터 spec이 붙는다.
-		passWithNoTests: true,
 		setupFiles: ['./test/setup.ts'],
 		coverage: {
 			provider: 'v8',
 			include: ['src/**/*.ts'],
 			exclude: ['src/**/*.module.ts', 'src/main.ts', 'src/main.consumer.ts'],
+			// 4지표 90% 미만이면 pnpm test가 실패한다. 근거는 루트 CLAUDE.md "완료 기준".
+			thresholds: { lines: 90, branches: 90, functions: 90, statements: 90 },
 		},
 	},
 	resolve: {

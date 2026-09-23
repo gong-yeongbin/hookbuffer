@@ -109,7 +109,7 @@ apps/backend/src/
 | `domain/` | 순수 유닛 (`*.spec.ts`, 의존 없음) |
 | service·consumer·scheduler | port를 in-memory fake로 유닛 |
 | `adapters/` | docker compose 위 통합 |
-| controller | e2e (`test/*.e2e-spec.ts`) |
+| controller | 얇은 유닛(응답 형식) + e2e (`test/*.e2e-spec.ts`). 유닛 커버리지 4지표 90% 게이트에 controller도 포함되므로 유닛을 생략할 수 없다 |
 
 ## Redis가 아니라 Valkey
 

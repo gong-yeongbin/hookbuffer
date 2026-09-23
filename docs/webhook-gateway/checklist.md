@@ -36,6 +36,7 @@ verify
 
 - [x] `context-notes.md`에 "코드 아키텍처: 전체 헥사고날" 섹션
 - [x] `apps/backend/eslint.config.mjs`에 import 경계 규칙
+- [x] 양쪽 앱 vitest에 coverage thresholds 4지표 90%, `pnpm test`가 커버리지 포함 실행
 
 verify
 
@@ -142,7 +143,7 @@ verify
 
 verify
 
-- [ ] `pnpm test:coverage` 4지표 90%
+- [ ] `pnpm test` 통과 (4지표 90% thresholds 포함)
 - [ ] 수동 — 웹훅 수신 → 목록 표시 → 상세 → 재전송 → 상태 변경
 
 ---
