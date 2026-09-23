@@ -118,6 +118,9 @@ BigInt. 모든 테이블에 created_at, 갱신되는 테이블에 updated_at.
     사용량은 인그레스가 Valkey INCR로 세고 배치가 `usage_period`에 스냅샷한다. 월 전환 시
     finalize → payment(정액 + 초과분) → 빌링키 승인. 실패는 `past_due`로 두고 일 1회 재시도, 3회
     실패 시 `canceled`와 plan=free. 토스는 스케줄링을 제공하지 않으므로 이 배치는 직접 만든다.
+    **다운그레이드 시 멤버 행은 지우지 않는다.** 자발적이든 결제 실패든 plan만 바꾸고, 가드가
+    "free·personal 조직은 owner만 접근"으로 나머지 멤버를 403 처리한다. 재결제하면 그대로 복구된다.
+    `past_due` 동안은 접근을 유지한다.
 
 스택 선택과 그 근거는 [context-notes.md](./context-notes.md)에 있다.
 
