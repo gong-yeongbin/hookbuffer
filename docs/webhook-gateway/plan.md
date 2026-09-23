@@ -30,7 +30,7 @@
 - **멀티테넌시·인증.** 구글 OAuth 로그인 → 서버 발급 JWT. organization ↔ user는
   membership(M:N)이고 role(owner/admin/member)은 membership에 둔다. 가입 시 개인 조직(free)을
   자동 생성한다. api_key는 관리 API용. 보존은 플랜별(코드 상수), 일 배치 삭제.
-- **결제·사용량.** 토스페이먼츠 빌링키 자동결제. 플랜 free / personal / team. 월 정액 + 포함
+- **결제·사용량.** 토스페이먼츠 빌링키 자동결제. 플랜 free / personal / team / team_plus. 월 정액 + 포함
   이벤트량 + 초과분 종량(Hookdeck식). free는 포함량 초과 시 429. 월 배치가 청구한다.
 - **관측.** 헬스 엔드포인트, 큐 적체·dead 증가 로그 경고.
 - **AWS 배포.** api·worker 두 ECS 서비스(같은 이미지, 다른 커맨드), RDS, ElastiCache Valkey,
@@ -73,11 +73,11 @@ BigInt. 모든 테이블에 created_at, 갱신되는 테이블에 updated_at.
 
 | 모델 | 핵심 컬럼 | 비고 |
 |---|---|---|
-| organization | id, name, plan(enum free/personal/team) | 테넌트. plan은 인그레스·가드가 보는 현재 적용 플랜 |
+| organization | id, name, plan(enum free/personal/team/team_plus) | 테넌트. plan은 인그레스·가드가 보는 현재 적용 플랜 |
 | user | id, email(unique), name, avatar_url | 구글 신원. 비밀번호 없음 |
 | user_identity | id, user_id, provider(enum google), provider_user_id | unique(provider, provider_user_id). 같은 이메일의 다른 provider는 기존 user에 추가 |
 | organization_member | organization_id, user_id, role(enum owner/admin/member) | pk(organization_id, user_id), index(user_id). 조직당 owner 1명 |
-| subscription | id, organization_id(unique), plan(enum personal/team), status(enum active/past_due/canceled), customer_key(unique), billing_key_enc, card_issuer_code, card_number_masked, current_period_start, current_period_end, canceled_at | 토스 빌링. free 조직은 행 없음. 빌링키는 암호화 |
+| subscription | id, organization_id(unique), plan(enum personal/team/team_plus), status(enum active/past_due/canceled), customer_key(unique), billing_key_enc, card_issuer_code, card_number_masked, current_period_start, current_period_end, canceled_at | 토스 빌링. free 조직은 행 없음. 빌링키는 암호화 |
 | usage_period | id, organization_id, period_start(date), event_count, finalized_at | unique(organization_id, period_start). Valkey 카운터 스냅샷 |
 | payment | id, subscription_id, usage_period_id, order_id(unique), payment_key, base_amount, overage_events, overage_amount, amount, status(enum pending/paid/failed), failure_code, failure_message, paid_at | index(subscription_id, created_at). order_id는 서버 생성(영문·숫자·-_ 6~64자) |
 | api_key | id, organization_id, prefix, key_hash, name, revoked_at | 관리 API. 해시만 저장 |
@@ -107,22 +107,24 @@ BigInt. 모든 테이블에 created_at, 갱신되는 테이블에 updated_at.
 11. **과금.** `organization.plan`이 적용 플랜이고 `subscription`은 결제 상태다. 플랜별 값은 코드
     상수이고 Hookdeck 기준이다.
 
-    | | free | personal | team |
-    |---|---|---|---|
-    | 월 정액 | 0원 | 19,000원 | 49,000원 |
-    | 월 포함 이벤트 | 1만 | 1만 | 1만 |
-    | 초과 | 429 거부 | 0.04원/건 (10만 건당 4,000원) | 0.04원/건 (10만 건당 4,000원) |
+    | | free | personal | team | team_plus |
+    |---|---|---|---|---|
+    | 월 정액 | 0원 | 19,000원 | 49,000원 | 149,000원 |
+    | 월 포함 이벤트 | 1,000 | 1만 | 1만 | 10만 |
+    | 초과 | 429 거부 | 0.04원/건 | 0.04원/건 | 0.04원/건 |
+    | 멤버 | 1명 | 1명 | 10명 | 무제한 |
+    | 보존 | 3일 | 7일 | 30일 | 90일 |
 
-    초과분은 건당 비례로 계산하고 원 단위 내림. `overage_amount = floor((event_count - 10,000) × 0.04)`.
-    예: 9만 건 초과 → 3,600원.
-    | 멤버 | 1명 | 1명 | 무제한 |
-    | 보존 | 3일 | 7일 | 30일 |
+    초과분은 건당 비례(10만 건당 4,000원)로 계산하고 원 단위 내림.
+    `overage_amount = floor((event_count - 포함량) × 0.04)`. 예: team에서 9만 건 초과 → 3,600원.
+    좌석 과금은 없다. 멤버 상한을 넘기려면 상위 플랜으로 올린다.
 
     사용량은 인그레스가 Valkey INCR로 세고 배치가 `usage_period`에 스냅샷한다. 월 전환 시
     finalize → payment(정액 + 초과분) → 빌링키 승인. 실패는 `past_due`로 두고 일 1회 재시도, 3회
     실패 시 `canceled`와 plan=free. 토스는 스케줄링을 제공하지 않으므로 이 배치는 직접 만든다.
     **다운그레이드 시 멤버 행은 지우지 않는다.** 자발적이든 결제 실패든 plan만 바꾸고, 가드가
-    "free·personal 조직은 owner만 접근"으로 나머지 멤버를 403 처리한다. 재결제하면 그대로 복구된다.
+    "멤버 수가 플랜 상한을 넘는 조직은 owner만 접근"으로 나머지 멤버를 403 처리한다. owner가 멤버를
+    상한 이하로 줄이거나 재결제하면 그대로 복구된다.
     `past_due` 동안은 접근을 유지한다.
 
 스택 선택과 그 근거는 [context-notes.md](./context-notes.md)에 있다.
