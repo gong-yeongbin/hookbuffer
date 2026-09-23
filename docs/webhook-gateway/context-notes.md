@@ -163,3 +163,81 @@ colima start --cpu 4 --memory 6 --disk 60 --vm-type vz
 
 `docker` CLI는 Homebrew의 독립 패키지(`brew install docker docker-compose`)이고, compose는
 플러그인이라 `~/.docker/config.json`의 `cliPluginsExtraDirs`에 등록돼 있다.
+
+## 유저·조직·결제 모델 (2026-09-23)
+
+2단계 스키마에 앞서 user부터 설계하다가 plan.md의 인증·테넌트·과금 절이 함께 바뀌었다.
+확정 컬럼은 plan.md 데이터 모델 표에 있고, 여기는 "왜"만 적는다.
+
+### 구글 OAuth만, 비밀번호 없음
+
+이메일·비밀번호 가입을 두지 않는다. `password_hash`, 비밀번호 재설정 플로, 이메일 인증이 통째로
+빠진다. "스택 선택" 표의 bcryptjs는 그래서 user 인증에는 쓰이지 않는다(api_key 해시는 별개).
+
+### user_identity를 지금 분리한 이유
+
+GitHub 로그인 추가가 예정돼 있다. `user.google_sub` 한 컬럼이 더 단순하지만, provider가 늘 때
+user 테이블을 마이그레이션해야 한다. 지금 분리하면 비용은 로그인 시 조인 하나다.
+
+연결 규칙. 다른 provider로 로그인했는데 provider가 검증한 이메일이 기존 user와 같으면 그 user에
+identity를 추가한다. 검증되지 않은 이메일은 연결하지 않는다(계정 탈취 경로).
+
+### organization ↔ user는 M:N membership
+
+구글 계정은 전역 식별자다. 1:N(user.organization_id, Slack식)으로 가면 이미 자기 조직이 있는
+계정을 다른 팀이 초대할 때 "기존 조직을 떠나라"거나 거절해야 한다. membership이면 자기 조직을
+유지한 채 팀에도 속한다. role은 membership에 둔다(같은 사람이 조직마다 다른 역할).
+
+참고한 구조는 Vercel·Hookdeck·Svix의 "개인=팀 통일형"이다. 가입하면 본인 1명짜리 조직이 자동
+생성되고 그 사람이 owner다. GitHub처럼 개인 계정과 org를 다른 종류의 소유자로 두는 안은 권한
+검사가 두 갈래로 갈려 제외했다.
+
+**개인 플랜은 별도 개념이 아니다.** 멤버가 owner 한 명뿐인 조직일 뿐이고, 플랜 차이는 행이 아니라
+허용 여부(초대 403, 이벤트 상한)로 나타난다. 그래서 "개인 모드" 코드 분기가 없다.
+
+### project(환경) 계층을 두지 않는 이유
+
+Hookdeck·Svix는 organization 아래 project/environment를 둔다. dev·prod 분리와 제품별 로그 격리가
+목적인데, 이건 고객 규모가 클 때 생기는 요구다. 여기서 넣으면 source·destination·api_key·
+connection 전부에 스코프가 한 단계 늘고 관리 API의 모든 조회에 조건이 붙는다. 얻는 건 "묶어
+보기"뿐이다. dev·prod는 소스를 나누거나 조직을 하나 더 만들면 된다. 필요해지면 nullable
+`project_id` 추가 마이그레이션이지 재설계는 아니다.
+
+### PK는 autoincrement, 로그 테이블만 BigInt
+
+UUID v7은 `@db.Uuid`로 16바이트라 저장 크기는 문제가 아니지만, URL·`X-Hookbuffer-Event-Id`
+헤더·로그에 36자로 찍히는 게 걸렸다. 개수 유추 우려는 이 제품에서 실질적 위험이 아니다.
+event·delivery·delivery_attempt는 무한 증가라 Int(약 21억)로 두면 언젠가 옮겨야 한다.
+`monorepo-practice`가 postback을 뒤늦게 BigInt로 옮긴 마이그레이션이 그 전례다.
+
+### 결제를 MVP로 끌어온 결정
+
+plan.md는 요금제·과금을 제외했었다. 팀 계정을 "가입 후 결제로 전환"하는 흐름으로 정하면서
+플랜 개념이 어차피 필요해졌고, 그렇다면 결제 테이블도 지금 설계하는 게 낫다고 봤다.
+
+**요금 구조 조사.** Hookdeck은 Developer $0(1명, 월 1만 이벤트, 보존 3일) / Team $39(무제한
+멤버, 1만 포함, 보존 7일, 초과 10만 건당 $3부터) / Growth $499. Svix는 Free $0(5만 메시지, 보존
+7일) / Basic $20 / Professional $490, 초과 건당 $0.0001. 둘 다 **월 정액 + 포함량 + 초과분
+종량**이고 좌석 과금은 없다. 무료 플랜은 멤버 수·보존일·초과 불가로 제한한다. 같은 구조로 간다.
+
+제외한 안. "정액 + 포함량 상한, 초과 시 429만"은 테이블이 둘로 끝나 가장 작지만 종량으로 가는
+길이 막힌다. "정액만, 사용량 무제한"은 free 남용을 막을 수단이 없다.
+
+플랜은 free / personal / team 셋. 가격·포함량·멤버 수·보존일은 코드 상수다. 플랜이 셋뿐이라
+plan 카탈로그 테이블은 과하다.
+
+### organization.plan과 subscription.plan이 둘 다 있는 이유
+
+인그레스·가드는 요청마다 플랜을 본다. 핫패스가 subscription을 조인하지 않도록 조직 컬럼
+하나로 둔다. subscription은 결제 상태(빌링키·주기·past_due)이고 free 조직은 행이 없다. 결제
+실패로 canceled가 되면 배치가 plan을 free로 내린다. 두 값이 어긋나는 구간은 배치 실행 사이뿐이다.
+
+### 사용량은 Valkey에서 센다
+
+인그레스 p99 50ms 목표라 DB 카운트를 넣지 않는다. `org:{id}:usage:{yyyymm}` INCR 하나다.
+배치가 매시간 `usage_period`에 스냅샷하고, 월이 바뀌면 finalize한다. Valkey가 날아가면 마지막
+스냅샷 이후 최대 1시간 치가 사라지는데, 청구는 고객에게 유리한 쪽으로 틀리는 것이라 허용한다.
+
+토스페이먼츠는 스케줄링을 제공하지 않는다(문서에 명시). 월 청구 배치, past_due 재시도(일 1회,
+3회 실패 시 canceled)는 직접 만든다. 빌링키 유효기간은 카드 유효기간과 같다. `payment.order_id`는
+토스 규칙(영문·숫자·`-`·`_` 6~64자)에 맞춰 서버가 만든다.

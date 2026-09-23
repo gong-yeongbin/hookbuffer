@@ -50,7 +50,8 @@ verify
 - [ ] Prisma 도입 (`prisma` 7.10.0, `@prisma/client`, `@prisma/adapter-pg`)
 - [ ] `plan.md`의 데이터 모델을 `schema.prisma`로 작성
 - [ ] `infra/prisma/*` 복사 (`monorepo-practice`)
-- [ ] 시드 — organization, user, source(프리셋 3종), destination, connection
+- [ ] 시드 — organization(free 1개, team 1개), user + user_identity(google), organization_member(owner),
+      subscription(team 조직), source(프리셋 3종), destination, connection
 - [ ] 루트 `dev` 스크립트에 `db:deploy`/`db:generate`/`db:seed` 추가
 - [ ] Dockerfile에 `prisma generate` + deploy 트리 재생성 단계 추가
 
@@ -116,13 +117,14 @@ verify
 
 - [ ] e2e — dead 10건 일괄 재시도 → pending
 - [ ] e2e — 리플레이로 새 delivery 생성
-- [ ] e2e — 8일 전 이벤트 삭제, 7일 전 유지
+- [ ] e2e — personal(보존 7일) 조직의 8일 전 이벤트 삭제, 7일 전 유지
 
 ---
 
 ## 7. 관리 API·인증
 
-- [ ] organization/user/api_key/source/destination/connection CRUD
+- [ ] 구글 OAuth 로그인 → 첫 로그인 시 user + user_identity + 개인 organization(free) + member(owner) 생성 → JWT 발급
+- [ ] organization/member/api_key/source/destination/connection CRUD
 - [ ] JWT 가드 + api_key 가드 (deny-by-default), `@Public`/`@Roles`
 - [ ] 이벤트·delivery 조회 (필터·페이징)
 - [ ] Swagger (`@nestjs/swagger` **11.4.7 고정**)
@@ -130,16 +132,35 @@ verify
 
 verify
 
+- [ ] e2e — 첫 로그인 시 organization·user_identity·member(owner) 생성
 - [ ] e2e — 가드 deny-by-default
 - [ ] e2e — 타 조직 리소스 404
 - [ ] e2e — api_key 폐기 후 401
+- [ ] e2e — plan=free 조직의 초대 403
 
 ---
 
-## 8. 대시보드
+## 8. 결제·사용량
+
+- [ ] 빌링키 발급·교체·삭제 API (토스 `authKey` → 빌링키, 암호화 저장)
+- [ ] 플랜 변경 (free → personal/team, subscription 생성)
+- [ ] 인그레스 usage INCR + free 포함량 초과 429
+- [ ] usage_period 스냅샷 배치 (1시간)
+- [ ] 월 청구 배치 — finalize → payment 생성(정액 + 초과분) → 승인 → past_due 재시도 → 3회 실패 시 canceled + plan=free
+- [ ] 플랜별 보존 배치 (retention 크론이 organization.plan을 본다)
+
+verify
+
+- [ ] 유닛 — 청구 금액 계산(정액 + 초과), subscription 상태 전이(active → past_due → canceled)
+- [ ] 통합 — 토스 테스트 상점 승인 성공·실패
+- [ ] e2e — free 조직 월 1만 초과 → 429
+
+---
+
+## 9. 대시보드
 
 - [ ] 로그인, 소스·목적지·연결 관리
-- [ ] 이벤트 목록·상세·재전송, 목적지 상태, API 키
+- [ ] 이벤트 목록·상세·재전송, 목적지 상태, API 키, 플랜·결제
 
 verify
 
@@ -148,7 +169,7 @@ verify
 
 ---
 
-## 9. 부하·문서
+## 10. 부하·문서
 
 - [ ] k6 인그레스 부하 스크립트
 - [ ] README — 아키텍처·설계 결정·수치·프리셋 연동 방법
@@ -160,7 +181,7 @@ verify
 
 ---
 
-## 10. AWS 배포
+## 11. AWS 배포
 
 - [ ] Terraform 복사·수정 — NLB 제거, worker ECS 서비스 추가, 이름·도메인 변수화
 - [ ] ElastiCache Valkey **9.1** (로컬 태그와 일치)
@@ -178,4 +199,6 @@ verify
 ## 단계와 무관하게 먼저 시작할 것
 
 - [ ] 토스페이먼츠·포트원 테스트 계정 발급 (3단계 전에 필요)
-- [ ] AWS 월 비용 방침 결정 — 상시 유지 vs 필요 시 기동 (10단계 전에 필요)
+- [ ] 토스페이먼츠 빌링 테스트 상점 발급 (8단계 전에 필요)
+- [ ] 구글 OAuth 클라이언트 ID 발급 (7단계 전에 필요)
+- [ ] AWS 월 비용 방침 결정 — 상시 유지 vs 필요 시 기동 (11단계 전에 필요)

@@ -20,14 +20,16 @@ API·워커 서버. NestJS 11 + Fastify + Prisma/PostgreSQL + Valkey(ioredis). �
 - BullMQ·Temporal 등 큐/워크플로 라이브러리. 재시도·백오프·서킷·DLQ를 직접 구현하는 게 목적이다.
 - Express 전용 API. 어댑터는 Fastify다.
 - `console.log`. nestjs-pino `Logger`를 주입받는다.
-- 서명 시크릿·API 키·인증 헤더를 로그에 남기는 것.
+- 서명 시크릿·빌링키·API 키·인증 헤더를 로그에 남기는 것.
 - `@/*` 외의 경로 별칭.
 
 ## 제품 규칙 중 코드에서 어기기 쉬운 것
 
 - 인그레스(`POST /in/:slug`)는 검증·저장·XADD만 한다. 외부 HTTP 호출을 넣지 않는다.
 - 워커는 at-least-once, 순서 미보장. 최대 시도 초과는 버리지 않고 `dead`로 남긴다.
-- HTTP DTO는 class-validator, DB JSON 컬럼은 zod. 비밀번호는 bcryptjs, 서명 시크릿은 AES-256-GCM.
+- HTTP DTO는 class-validator, DB JSON 컬럼은 zod. 로그인은 구글 OAuth(비밀번호 없음), 서명
+  시크릿과 빌링키는 AES-256-GCM.
+- 인그레스 경로의 사용량 집계는 Valkey INCR 하나뿐이다. DB 카운트나 집계 쿼리를 넣지 않는다.
 
 ## 함정
 
