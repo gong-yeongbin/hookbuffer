@@ -1,5 +1,5 @@
 # 빌드 컨텍스트는 모노레포 루트다(pnpm 워크스페이스 lockfile이 루트에 있다).
-#   docker build -f apps/backend/Dockerfile -t hookbuffer-backend:<tag> .
+#   docker build -f apps/backend/Dockerfile -t relaydam-backend:<tag> .
 #
 # Fargate 태스크가 ARM64(Graviton)라 이미지도 arm64여야 한다 — x86 이미지를 push하면
 # 태스크가 exec format error로 죽는다. Apple Silicon에서 빌드하면 기본이 arm64다.

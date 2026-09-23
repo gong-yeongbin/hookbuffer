@@ -1,16 +1,16 @@
 services:
   postgres:
     image: postgres:17
-    container_name: hookbuffer-postgres
+    container_name: relaydam-postgres
     environment:
       POSTGRES_PASSWORD: "1234"
-      POSTGRES_DB: hookbuffer
+      POSTGRES_DB: relaydam
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d hookbuffer"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d relaydam"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -19,7 +19,7 @@ services:
   # 로컬에서 먼저 걸린다 — 여기 태그를 올리면 Terraform의 engine_version도 같이 올린다.
   valkey:
     image: valkey/valkey:9.1-alpine
-    container_name: hookbuffer-valkey
+    container_name: relaydam-valkey
     ports:
       - "6379:6379"
     volumes:

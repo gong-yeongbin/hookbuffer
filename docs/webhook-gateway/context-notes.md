@@ -205,7 +205,7 @@ connection 전부에 스코프가 한 단계 늘고 관리 API의 모든 조회�
 
 ### PK는 autoincrement, 로그 테이블만 BigInt
 
-UUID v7은 `@db.Uuid`로 16바이트라 저장 크기는 문제가 아니지만, URL·`X-Hookbuffer-Event-Id`
+UUID v7은 `@db.Uuid`로 16바이트라 저장 크기는 문제가 아니지만, URL·`X-Relaydam-Event-Id`
 헤더·로그에 36자로 찍히는 게 걸렸다. 개수 유추 우려는 이 제품에서 실질적 위험이 아니다.
 event·delivery·delivery_attempt는 무한 증가라 Int(약 21억)로 두면 언젠가 옮겨야 한다.
 `monorepo-practice`가 postback을 뒤늦게 BigInt로 옮긴 마이그레이션이 그 전례다.
@@ -314,3 +314,16 @@ team에서 free로 내려가면 멤버 상한(1명)을 넘는 멤버가 생긴�
   전역 직렬화기 하나로 처리하고 커서도 문자열로 맞춘다.
 - **플랜 게이트는 service에서.** 초대 가능 여부·owner 전용 접근·이벤트 상한은 조직 상태를 읽어야
   해서 가드에 두면 가드가 port를 여럿 주입받는다. 라우트 수준 규칙(role)만 가드, 상태 규칙은 service.
+
+## 이름: hookbuffer → relaydam (2026-09-23)
+
+hookbuffer는 뜻이 정확했지만 두 가지가 걸렸다. 같은 이름의 오픈소스(cbackas/hookbuffer, Sonarr →
+Discord 웹훅 프록시, Rust)가 활발히 유지되고 있어 검색이 그쪽에 가려지고, "hook-" 접두사가
+Hookdeck과 같은 결이라 "Hookdeck의 한국어 버전"으로 읽힐 여지가 있었다. 법적 위험은 둘 다
+낮았고(hook은 서술어, 오픈소스 이름은 자동 상표가 아님), 문제는 포지셔닝과 검색이었다.
+
+hook 계열(hookdam·hookkeep·hookmoat)과 비계열(weirbox·inletbox·relaydam) 후보를 GitHub 계정·npm·
+.com/.io/.dev DNS로 확인했다. 사전 단어(sluice·weir·floodgate·spillway·intake)는 전부 잡혀 있었다.
+relaydam은 확인한 모든 곳이 비어 있었고, "받아 가뒀다가(dam) 흘려보낸다(relay)"가 제품 동작
+그대로다. 메타 헤더는 `X-Relaydam-*`, 로컬 DB 이름은 `relaydam`으로 같이 바꿨다.
+GitHub organization·도메인 선점은 사용자가 직접 한다.

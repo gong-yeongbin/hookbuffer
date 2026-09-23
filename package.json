@@ -1,5 +1,5 @@
 {
-	"name": "hookbuffer",
+	"name": "relaydam",
 	"private": true,
 	"scripts": {
 		"build": "turbo run build",
