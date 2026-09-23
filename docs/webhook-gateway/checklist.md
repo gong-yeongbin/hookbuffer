@@ -152,7 +152,8 @@ verify
 
 verify
 
-- [ ] 유닛 — 청구 금액 계산(정액 + 초과), subscription 상태 전이(active → past_due → canceled)
+- [ ] 유닛 — 청구 금액 계산(정액 + 초과). 포함량 이하 → 정액만, 9만 건 초과 → 3,600원, 1건 초과 → 0원(내림)
+- [ ] 유닛 — subscription 상태 전이(active → past_due → canceled)
 - [ ] 통합 — 토스 테스트 상점 승인 성공·실패
 - [ ] e2e — free 조직 월 1만 초과 → 429
 
