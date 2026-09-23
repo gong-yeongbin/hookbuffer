@@ -47,6 +47,70 @@ NestJS 11에서 설치되지 않는다. 생태계가 이미 12로 넘어간 상�
 `@nestjs/schedule`(12.0.2)과 `@nestjs/config`(12.0.0)는 11.x 라인 자체가 없다. peer가
 `^11.0.0 || ^12.0.0`이라 NestJS 11에서 그대로 쓴다.
 
+## 코드 아키텍처: 전체 헥사고날 (2026-09-23)
+
+NestJS 안의 코드 조직은 **전 모듈에 헥사고날(port/adapter) 한 규칙**을 적용한다. 도메인 클래스와
+매퍼는 만들지 않고 Prisma 생성 타입을 port 시그니처에 그대로 쓴다.
+
+이 프로젝트가 보여줄 것은 재시도·서킷·DLQ 설계이고, 체크리스트 4·5단계 verify가 "유닛 — 백오프
+계산, 상태 전이표, 상태 머신"이다. 그 유닛 테스트를 Postgres·Valkey 없이 돌리려면 service가
+Prisma·ioredis를 몰라야 하는데, 헥사고날은 그것을 규칙으로 강제한다. 외부 의존이 Prisma, Valkey,
+목적지 HTTP, 암호화 넷뿐이라 port 수가 유한해서 비용도 유한하다.
+
+### 제외한 안
+
+| 안 | 이유 |
+|---|---|
+| 레이어드 (NestJS 기본) | service가 Prisma·ioredis를 직접 주입받아 핵심 로직 유닛 테스트가 통합 테스트로 변한다 |
+| 헥사고날 + DDD 전술 | Prisma 타입만으로 상태 전이를 순수 함수로 표현할 수 있어 도메인 클래스·매퍼 비용이 이득을 넘지 못한다 |
+| 함수형 코어 + 명령형 셸 | 결과물은 비슷하지만 service가 여전히 Prisma를 import해 consumer·scheduler·sweeper 테스트에 mock이 필요하다 |
+| 혼합 (핵심 2모듈만 port) | 모듈마다 규칙이 달라진다. 단일 규칙이 조건이었다 |
+
+### 규칙
+
+1. **service·consumer·scheduler·guard는 `ports/`의 인터페이스만 주입받는다.** `@prisma/client`
+   (런타임), `ioredis`, `@/infra/**` import는 `adapters/`와 `infra/`에서만 허용한다. Prisma 생성
+   타입은 `import type`으로 어디서든 쓴다.
+2. **`domain/`은 순수 함수와 타입만.** `@nestjs/*`, `@prisma/client`(런타임), `ioredis`,
+   `@/infra/**`를 import하지 않는다. 시각이 필요하면 `now: Date`를 인자로 받는다. Clock port는
+   두지 않는다.
+3. port 파일 하나에 인터페이스와 DI 토큰(`Symbol`)을 함께 둔다. port와 adapter는 그 모듈이
+   소유한다. `infra/`에는 공유 런타임 클라이언트(PrismaService, ValkeyService, Stream 컨슈머
+   베이스)만 둔다.
+
+규칙은 `apps/backend/eslint.config.mjs`의 `@typescript-eslint/no-restricted-imports`로 강제한다.
+문서로만 두면 샌다.
+
+### 폴더 구조
+
+```
+apps/backend/src/
+  main.ts                    APP_ROLE=api
+  main.consumer.ts           APP_ROLE=consumer
+  app.module.ts
+  config/                    env 스키마(zod), 상수
+  common/                    데코레이터(@Public/@Roles), 필터, 인터셉터. port 의존 없음
+  infra/
+    prisma/                  PrismaService
+    valkey/                  ValkeyService(ioredis), Stream 컨슈머 베이스
+  modules/
+    <module>/
+      <module>.controller.ts
+      <module>.service.ts    (consumer·scheduler·sweeper도 같은 층)
+      domain/                순수 함수. 예: backoff.ts, delivery-state.ts, circuit-state.ts, signature/*
+      ports/                 인터페이스 + Symbol 토큰. 예: delivery.repository.ts, delivery.queue.ts
+      adapters/              port 구현. 예: prisma-delivery.repository.ts, valkey-delivery.queue.ts
+```
+
+### 계층별 테스트
+
+| 계층 | 방식 |
+|---|---|
+| `domain/` | 순수 유닛 (`*.spec.ts`, 의존 없음) |
+| service·consumer·scheduler | port를 in-memory fake로 유닛 |
+| `adapters/` | docker compose 위 통합 |
+| controller | e2e (`test/*.e2e-spec.ts`) |
+
 ## Redis가 아니라 Valkey
 
 프로덕션이 ElastiCache Valkey인데 로컬만 Redis면 어긋난다. 로컬 `valkey/valkey:9.1-alpine`,

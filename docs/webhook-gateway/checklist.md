@@ -32,6 +32,18 @@ verify
 
 ---
 
+## 1.5 코드 아키텍처 결정 — 완료 (2026-09-23)
+
+- [x] `context-notes.md`에 "코드 아키텍처: 전체 헥사고날" 섹션
+- [x] `apps/backend/eslint.config.mjs`에 import 경계 규칙
+
+verify
+
+- [x] `pnpm lint` 통과 (경고 0)
+- [x] `modules/` 안에서 `@prisma/client` 런타임 import, `@/infra/*` import가 경고로 잡힘
+
+---
+
 ## 2. 스키마·마이그레이션·시드
 
 - [ ] Prisma 도입 (`prisma` 7.10.0, `@prisma/client`, `@prisma/adapter-pg`)
