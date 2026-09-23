@@ -104,12 +104,20 @@ BigInt. 모든 테이블에 created_at, 갱신되는 테이블에 updated_at.
 9. **at-least-once.** 워커 처리는 최소 1회. 목적지 측 멱등은 `X-Hookbuffer-Event-Id` 헤더로 지원.
 10. **테넌트 계층.** organization 하나가 유일한 스코프. project(환경) 계층은 두지 않는다. dev·prod는
     소스를 나누거나 조직을 하나 더 만든다.
-11. **과금.** `organization.plan`이 적용 플랜이고 `subscription`은 결제 상태다. 플랜별 가격·포함
-    이벤트·멤버 수·보존일은 코드 상수(초안 free 멤버 1·월 1만 포함·초과 429, personal 멤버 1·월 5만
-    포함, team 멤버 무제한·월 20만 포함. 금액과 초과 단가는 미정). 사용량은 인그레스가 Valkey
-    INCR로 세고 배치가 `usage_period`에 스냅샷한다. 월 전환 시 finalize → payment(정액 + 초과분)
-    → 빌링키 승인. 실패는 `past_due`로 두고 일 1회 재시도, 3회 실패 시 `canceled`와 plan=free.
-    토스는 스케줄링을 제공하지 않으므로 이 배치는 직접 만든다.
+11. **과금.** `organization.plan`이 적용 플랜이고 `subscription`은 결제 상태다. 플랜별 값은 코드
+    상수이고 Hookdeck 기준이다.
+
+    | | free | personal | team |
+    |---|---|---|---|
+    | 월 정액 | 0원 | 19,000원 | 49,000원 |
+    | 월 포함 이벤트 | 1만 | 1만 | 1만 |
+    | 초과 | 429 거부 | 10만 건당 4,000원 | 10만 건당 4,000원 |
+    | 멤버 | 1명 | 1명 | 무제한 |
+    | 보존 | 3일 | 7일 | 30일 |
+
+    사용량은 인그레스가 Valkey INCR로 세고 배치가 `usage_period`에 스냅샷한다. 월 전환 시
+    finalize → payment(정액 + 초과분) → 빌링키 승인. 실패는 `past_due`로 두고 일 1회 재시도, 3회
+    실패 시 `canceled`와 plan=free. 토스는 스케줄링을 제공하지 않으므로 이 배치는 직접 만든다.
 
 스택 선택과 그 근거는 [context-notes.md](./context-notes.md)에 있다.
 
