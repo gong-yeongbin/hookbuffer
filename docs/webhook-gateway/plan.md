@@ -40,7 +40,8 @@
 
 CLI 로컬 터널, 변환 스크립트·필터, 키 기반 순서 보장, 본문 S3 오프로드(MVP는 Postgres Text +
 256KB 상한), 알림 채널(Slack·이메일), 발신(outbound) 웹훅, 초대(invitation) 테이블, 구글 외
-OAuth provider, project(환경) 계층, 환불·쿠폰·세금계산서, 연간 결제.
+OAuth provider, project(환경) 계층, 환불·쿠폰·세금계산서, 연간 결제, 엔터프라이즈 플랜(계약별
+조건·시스템 밖 결제. 필요해지면 `enterprise` enum 값 하나로 "상한 없음·청구 배치 제외"만 표현).
 
 ## 아키텍처
 
