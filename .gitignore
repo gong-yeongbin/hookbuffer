@@ -28,3 +28,6 @@ dist
 .terraform
 *.tfstate
 *.tfstate.*
+
+# IDE
+.idea
