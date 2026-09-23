@@ -258,3 +258,29 @@ team에서 free로 내려가면 멤버 상한(1명)을 넘는 멤버가 생긴�
 토스페이먼츠는 스케줄링을 제공하지 않는다(문서에 명시). 월 청구 배치, past_due 재시도(일 1회,
 3회 실패 시 canceled)는 직접 만든다. 빌링키 유효기간은 카드 유효기간과 같다. `payment.order_id`는
 토스 규칙(영문·숫자·`-`·`_` 6~64자)에 맞춰 서버가 만든다.
+
+## API 형식 (2026-09-23)
+
+규칙 자체는 `apps/backend/CLAUDE.md` "엔드포인트" 절에 있다. 여기는 각 결정의 이유다.
+
+- **`/orgs/:orgId` 접두사.** membership이 M:N이라 주체만으로 조직이 정해지지 않는다. 헤더
+  `X-Organization-Id`는 Swagger·curl·링크 공유에 불리하고, JWT에 활성 조직을 넣는 안은 조직을
+  바꿀 때마다 토큰을 재발급해야 하며 api_key와 규칙이 갈린다.
+- **커서 페이징 통일.** event·delivery가 BigInt autoincrement라 id가 시간순이고, 대량 로그에서
+  offset은 뒤로 갈수록 느리다. 소스·목적지처럼 적은 목록까지 통일한 건 형식을 하나로 두기 위해서다.
+- **응답 래퍼 없음.** `monorepo-practice`의 `{ statusCode, data, _meta }`는 프론트가 매번 한 겹
+  벗겨야 했고, `_meta`가 요청 본문·쿼리를 그대로 되돌려 비밀이 응답에 섞일 수 있는 경로였다.
+  Stripe·GitHub처럼 단건은 객체, 목록만 `{ data, next_cursor }`.
+- **오류 `{ code, message }`.** Nest 기본 `{ statusCode, message, error }`에는 기계가 분기할 code가
+  없다. 커스텀 예외 클래스 대신 내장 예외에 객체를 넘기는 건 클래스 수를 늘리지 않기 위해서다.
+- **타 조직 리소스는 404.** 존재 여부를 노출하지 않는다. `monorepo-practice`에서는 프론트가 403을
+  세션 만료로 취급해 로그아웃시키는 문제도 있었다. 403은 소속은 맞지만 role·플랜이 부족할 때만.
+- **api_key는 member 권한.** 키가 유출돼도 피해를 소스·목적지·이벤트로 한정한다. 자동화가 멤버·
+  결제·API 키를 만질 이유가 없다. api_key에 role 컬럼을 두는 안은 테이블 설계를 다시 여는
+  비용이라 제외했다.
+- **snake_case.** Prisma 행을 그대로 반환하기로 했으므로 응답은 이미 snake_case다. 요청만
+  camelCase로 두면 DTO마다 매핑이 생긴다. Stripe·GitHub API도 snake_case다.
+- **BigInt는 문자열.** JSON은 2^53 이상을 표현하지 못하고 `JSON.stringify`가 bigint에서 던진다.
+  전역 직렬화기 하나로 처리하고 커서도 문자열로 맞춘다.
+- **플랜 게이트는 service에서.** 초대 가능 여부·owner 전용 접근·이벤트 상한은 조직 상태를 읽어야
+  해서 가드에 두면 가드가 port를 여럿 주입받는다. 라우트 수준 규칙(role)만 가드, 상태 규칙은 service.

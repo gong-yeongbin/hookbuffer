@@ -137,6 +137,7 @@ verify
 - [ ] e2e — 타 조직 리소스 404
 - [ ] e2e — api_key 폐기 후 401
 - [ ] e2e — plan=free 조직의 초대 403
+- [ ] e2e — 목록 커서로 두 페이지 순회 후 next_cursor null
 
 ---
 
