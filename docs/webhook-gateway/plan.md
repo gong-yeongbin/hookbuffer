@@ -119,6 +119,9 @@ BigInt. 모든 테이블에 created_at, 갱신되는 테이블에 updated_at.
     초과분은 건당 비례(4건에 1원, 10만 건당 25,000원)로 계산하고 원 단위 내림.
     `overage_amount = floor((event_count - 포함량) × 0.25)`. 예: team에서 9만 건 초과 → 22,500원.
     좌석 과금은 없다. 멤버 상한을 넘기려면 상위 플랜으로 올린다.
+    free가 포함량을 넘으면 인그레스가 429 `usage_exceeded`를 돌려주고 event를 저장하지 않는다.
+    카운터 INCR이 INSERT보다 앞서므로 멱등 키가 같은 중복 요청도 카운트한다. `Retry-After`는
+    붙이지 않는다. 유료 플랜으로 올리면 즉시 다시 받는다.
 
     사용량은 인그레스가 Valkey INCR로 세고 배치가 `usage_period`에 스냅샷한다. 월 전환 시
     finalize → payment(정액 + 초과분) → 빌링키 승인. 실패는 `past_due`로 두고 일 1회 재시도, 3회
