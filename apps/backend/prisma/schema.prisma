@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── enum ────────────────────────────────────────────────────────────────
+// 값은 소문자. API가 Prisma 행을 그대로 반환하므로 응답에도 그대로 나간다.
+
+enum Plan {
+  free
+  personal
+  team
+  team_plus
+}
+
+// subscription에는 free가 없다. free 조직은 subscription 행이 없다.
+enum SubscriptionPlan {
+  personal
+  team
+  team_plus
+}
+
+enum SubscriptionStatus {
+  active
+  past_due
+  canceled
+}
+
+enum IdentityProvider {
+  google
+}
+
+enum MemberRole {
+  owner
+  admin
+  member
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+}
+
+// ─── 계정·테넌트 ─────────────────────────────────────────────────────────
+
+model organization {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  // 인그레스·가드가 보는 현재 적용 플랜. subscription을 조인하지 않으려고 둔다.
+  plan       Plan     @default(free)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  members       organization_member[]
+  subscription  subscription?
+  usage_periods usage_period[]
+}
+
+model user {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique @db.VarChar(255)
+  name       String   @db.VarChar(100)
+  avatar_url String?  @db.Text
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  identities  user_identity[]
+  memberships organization_member[]
+}
+
+model user_identity {
+  id               Int              @id @default(autoincrement())
+  user             user             @relation(fields: [user_id], references: [id])
+  user_id          Int
+  provider         IdentityProvider
+  provider_user_id String           @db.VarChar(255)
+  created_at       DateTime         @default(now()) @db.Timestamptz(3)
+
+  @@unique([provider, provider_user_id])
+  @@index([user_id])
+}
+
+// 조직당 owner 1명은 마이그레이션 SQL의 부분 유니크 인덱스로 강제한다.
+// CREATE UNIQUE INDEX organization_member_one_owner ON organization_member (organization_id) WHERE role = 'owner';
+model organization_member {
+  organization    organization @relation(fields: [organization_id], references: [id])
+  organization_id Int
+  user            user         @relation(fields: [user_id], references: [id])
+  user_id         Int
+  role            MemberRole
+  created_at      DateTime     @default(now()) @db.Timestamptz(3)
+  updated_at      DateTime     @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@id([organization_id, user_id])
+  @@index([user_id])
+}
+
+// ─── 결제·사용량 ─────────────────────────────────────────────────────────
+
+// 토스 빌링. free 조직은 행이 없다.
+model subscription {
+  id                   Int                @id @default(autoincrement())
+  organization         organization       @relation(fields: [organization_id], references: [id])
+  organization_id      Int                @unique
+  plan                 SubscriptionPlan
+  status               SubscriptionStatus
+  customer_key         String             @unique @db.VarChar(64)
+  // AES-256-GCM. select에서 빼고 읽는다.
+  billing_key_enc      String             @db.Text
+  card_issuer_code     String             @db.VarChar(10)
+  card_number_masked   String             @db.VarChar(20)
+  current_period_start DateTime           @db.Timestamptz(3)
+  current_period_end   DateTime           @db.Timestamptz(3)
+  canceled_at          DateTime?          @db.Timestamptz(3)
+  created_at           DateTime           @default(now()) @db.Timestamptz(3)
+  updated_at           DateTime           @default(now()) @updatedAt @db.Timestamptz(3)
+
+  payments payment[]
+}
+
+// Valkey 카운터(org:{id}:usage:{yyyymm})의 스냅샷
+model usage_period {
+  id              Int          @id @default(autoincrement())
+  organization    organization @relation(fields: [organization_id], references: [id])
+  organization_id Int
+  period_start    DateTime     @db.Date
+  event_count     Int          @default(0)
+  finalized_at    DateTime?    @db.Timestamptz(3)
+  created_at      DateTime     @default(now()) @db.Timestamptz(3)
+  updated_at      DateTime     @default(now()) @updatedAt @db.Timestamptz(3)
+
+  payments payment[]
+
+  @@unique([organization_id, period_start])
+}
+
+// 금액은 원 단위 정수. amount = base_amount + overage_amount
+model payment {
+  id              Int           @id @default(autoincrement())
+  subscription    subscription  @relation(fields: [subscription_id], references: [id])
+  subscription_id Int
+  // 첫 결제는 기본료만이라 사용량 기간이 없을 수 있다
+  usage_period    usage_period? @relation(fields: [usage_period_id], references: [id])
+  usage_period_id Int?
+  // 서버 생성. 토스 규칙: 영문·숫자·-_ 6~64자
+  order_id        String        @unique @db.VarChar(64)
+  payment_key     String?       @db.VarChar(200)
+  base_amount     Int
+  overage_events  Int           @default(0)
+  overage_amount  Int           @default(0)
+  amount          Int
+  status          PaymentStatus @default(pending)
+  failure_code    String?       @db.VarChar(100)
+  failure_message String?       @db.Text
+  paid_at         DateTime?     @db.Timestamptz(3)
+  created_at      DateTime      @default(now()) @db.Timestamptz(3)
+  updated_at      DateTime      @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@index([subscription_id, created_at])
+  @@index([usage_period_id])
+}
