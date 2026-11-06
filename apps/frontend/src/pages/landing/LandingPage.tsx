@@ -3,6 +3,7 @@ import { type ReactNode, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router';
 import { getToken } from '@/auth/token';
 import { Faq } from '@/components/Faq';
+import { useLandingOnly } from '@/config';
 import { StatusTag } from '@/components/StatusTag';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +13,9 @@ import { AttemptsFragment, EventsFragment, Panel, SOURCE_URL, SourceFragment } f
 // 방향 "제품이 직접 동작"(context-notes 2026-10-28): 설명 대신 실제 화면 조각이 일한다.
 // 첫 화면은 제목 + 코발트 무대 위의 이벤트 화면. 무대 왼쪽 위 모서리를 계단형으로 깎는다(이 페이지의 유일한 장식)
 export function LandingPage() {
-	// 이미 로그인돼 있으면 대시보드로
-	if (getToken()) return <Navigate to="/app" replace />;
+	const landingOnly = useLandingOnly();
+	// 이미 로그인돼 있으면 대시보드로. 랜딩만 공개한 배포에서는 /app이 다시 /로 오므로 보내지 않는다
+	if (getToken() && !landingOnly) return <Navigate to="/app" replace />;
 
 	return (
 		<PublicLayout>
@@ -30,6 +32,7 @@ export function LandingPage() {
 }
 
 function Hero() {
+	const landingOnly = useLandingOnly();
 	return (
 		<section className="relative min-h-[90svh] overflow-hidden">
 			<div className="max-w-[46%] px-12 pt-[110px]">
@@ -39,9 +42,15 @@ function Hero() {
 					답할 때까지 보낸다
 				</h1>
 				<p className="mt-7 max-w-[40ch] text-lg leading-relaxed text-cobalt-muted">외부 서비스의 웹훅을 대신 받아 저장하고, 서버가 답할 때까지 재시도하며 전달합니다. 전부 기록되고, 다시 보낼 수 있습니다.</p>
-				<Link to="/login" className={cn(buttonVariants({ size: 'lg' }), 'mt-8')}>
-					무료로 시작하기
-				</Link>
+				{landingOnly ? (
+					<span aria-disabled className={cn(buttonVariants({ size: 'lg' }), 'mt-8 pointer-events-none opacity-60')}>
+						준비 중
+					</span>
+				) : (
+					<Link to="/login" className={cn(buttonVariants({ size: 'lg' }), 'mt-8')}>
+						무료로 시작하기
+					</Link>
+				)}
 			</div>
 			{/* 무대. clip-path가 자식도 자르므로 화면 조각은 깎인 모서리 아래에 둔다 */}
 			<div className="hero-stage absolute top-[42%] right-[-40px] bottom-[-40px] left-[38%] bg-primary">
@@ -211,6 +220,7 @@ function Features() {
 
 // 카드 없이 숫자 하나
 function Pricing() {
+	const landingOnly = useLandingOnly();
 	return (
 		<section className="grid min-h-[80svh] grid-cols-12 items-center gap-8 px-12 pt-[120px]">
 			<div className="col-span-4 self-start pt-6">
@@ -229,9 +239,15 @@ function Pricing() {
 					<li>소스·목적지 각 3개</li>
 					<li>자동 재시도, 서명 검증, 재전송 전부 포함</li>
 				</ul>
-				<Link to="/pricing" className={cn(buttonVariants({ size: 'lg' }), 'mt-8')}>
-					요금 자세히 보기
-				</Link>
+				{landingOnly ? (
+					<span aria-disabled className={cn(buttonVariants({ size: 'lg' }), 'mt-8 pointer-events-none opacity-60')}>
+						준비 중
+					</span>
+				) : (
+					<Link to="/pricing" className={cn(buttonVariants({ size: 'lg' }), 'mt-8')}>
+						요금 자세히 보기
+					</Link>
+				)}
 			</div>
 		</section>
 	);
@@ -239,6 +255,7 @@ function Pricing() {
 
 // 페이지 끝은 제품의 첫 화면이 이미 열려 있다. 입력한 이름은 로그인으로 넘긴다
 function Cta() {
+	const landingOnly = useLandingOnly();
 	const navigate = useNavigate();
 	const [name, setName] = useState('shop');
 	return (
@@ -249,7 +266,7 @@ function Cta() {
 					<br />
 					시작합니다
 				</p>
-				<p className="mt-6 text-[17px] text-sand/80">구글 로그인 한 번이면 됩니다. 카드는 필요 없습니다.</p>
+				<p className="mt-6 text-[17px] text-sand/80">{landingOnly ? '곧 열립니다. 열리면 구글 로그인 한 번이면 됩니다.' : '구글 로그인 한 번이면 됩니다. 카드는 필요 없습니다.'}</p>
 			</div>
 			<form
 				data-ui
@@ -264,8 +281,8 @@ function Cta() {
 					이름
 				</label>
 				<Input id="landing-project-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1.5 h-9" />
-				<Button type="submit" size="lg" className="mt-5 w-full" disabled={!name.trim()}>
-					만들고 시작하기
+				<Button type="submit" size="lg" className="mt-5 w-full" disabled={landingOnly || !name.trim()}>
+					{landingOnly ? '준비 중' : '만들고 시작하기'}
 				</Button>
 			</form>
 		</section>

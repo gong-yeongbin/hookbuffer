@@ -20,6 +20,8 @@ export default defineConfig({
 		environment: 'jsdom',
 		include: ['src/**/*.{test,spec}.{ts,tsx}'],
 		setupFiles: ['./src/test/setup.ts'],
+		// user-event로 폼을 채우는 테스트가 기본 5초를 넘길 때가 있다(머신이 바쁠 때). 느린 게 아니라 글자 수 때문
+		testTimeout: 15000,
 		coverage: {
 			provider: 'v8',
 			include: ['src/**/*.{ts,tsx}'],

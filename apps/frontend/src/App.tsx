@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router';
 import { ProjectProvider } from './auth/project';
+import { LANDING_ONLY, LandingOnlyContext } from './config';
 import { RequireAuth } from './auth/RequireAuth';
 import { AppShell, Placeholder } from './layout/AppShell';
 import { ComingSoon } from './layout/PublicLayout';
@@ -18,8 +19,19 @@ import { SourcesPage } from './pages/sources/SourcesPage';
 import { UsagePage } from './pages/usage/UsagePage';
 
 // 라우트 표. 화면이 늘 때마다 한 줄씩. 경로가 바뀌면 key가 바뀌어 .page의 페이드인이 다시 돈다
-export function App() {
+export function App({ landingOnly = LANDING_ONLY }: { landingOnly?: boolean }) {
 	const { pathname } = useLocation();
+	if (landingOnly)
+		return (
+			<LandingOnlyContext.Provider value={true}>
+				<div key={pathname} className="page">
+					<Routes>
+						<Route path="/" element={<LandingPage />} />
+						<Route path="*" element={<Navigate to="/" replace />} />
+					</Routes>
+				</div>
+			</LandingOnlyContext.Provider>
+		);
 	return (
 		<div key={pathname} className="page">
 			<Routes>

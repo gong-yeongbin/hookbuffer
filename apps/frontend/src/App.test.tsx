@@ -7,7 +7,7 @@ describe('App', () => {
 		localStorage.clear();
 		render(
 			<MemoryRouter initialEntries={['/']}>
-				<App />
+				<App landingOnly={false} />
 			</MemoryRouter>
 		);
 		expect(screen.getByRole('heading', { level: 1, name: /웹훅을 받아 두고/ })).toBeDefined();
@@ -17,7 +17,7 @@ describe('App', () => {
 		localStorage.clear();
 		render(
 			<MemoryRouter initialEntries={['/login']}>
-				<App />
+				<App landingOnly={false} />
 			</MemoryRouter>
 		);
 		expect(screen.getByRole('button', { name: /Google 계정으로 로그인/ })).toBeDefined();
@@ -27,7 +27,7 @@ describe('App', () => {
 		localStorage.clear();
 		render(
 			<MemoryRouter initialEntries={['/docs']}>
-				<App />
+				<App landingOnly={false} />
 			</MemoryRouter>
 		);
 		expect(screen.getByText('준비 중입니다.')).toBeDefined();

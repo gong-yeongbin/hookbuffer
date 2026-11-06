@@ -50,6 +50,12 @@ src/
 `VITE_GOOGLE_CLIENT_ID`(백엔드 `GOOGLE_CLIENT_ID`와 같은 값)가 있으면 실제 구글 버튼(GIS)이 뜨고, 없으면 `.env.local`의 `VITE_DEV_TOKEN`(시드 유저 JWT, 7일)으로 들어가는 개발용 버튼이다.
 401로 튕기면 토큰이 만료된 것이다. 테스트는 `test/setup.ts`가 클라이언트 ID를 비워 개발용 버튼으로 돈다.
 
+## 공개 범위
+
+`src/config.ts`의 `LANDING_ONLY`가 지금 공개하는 범위다. true면 `/`만 열리고 나머지 경로는 `/`로 가며, 상단 바는 워드마크만,
+본문의 시작·요금 버튼은 "준비 중"이다. 기능이 준비되면 false로 바꾼다(환경 변수가 아니다). 정적 호스팅은 모든 경로를
+`index.html`로 돌려주는 SPA fallback이 있어야 한다. 테스트의 `renderApp`은 기본 false라 전체 화면을 검사한다.
+
 ## 하지 않는 것
 
 - Redux·Zustand 등 전역 스토어. antd·Mantine 등 다른 UI 라이브러리. `@tanstack/react-table`·폼 라이브러리·날짜 선택기는 필요해질 때까지.

@@ -2,6 +2,7 @@ import { cn } from 'cn';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 import { buttonVariants } from '@/components/ui/button';
+import { useLandingOnly } from '@/config';
 
 // 상단 메뉴. 페이지가 생기면 여기 경로만 바꾼다
 const NAV = [
@@ -13,6 +14,7 @@ const NAV = [
 // 로그인 전 화면(랜딩·요금)의 공통 틀. 모래색 바탕, 워드마크 왼쪽, 글자 링크 오른쪽. 푸터는 맨 아래 한 줄
 export function PublicLayout({ children }: { children: ReactNode }) {
 	const { pathname } = useLocation();
+	const landingOnly = useLandingOnly();
 	return (
 		<div className="min-h-screen bg-sand text-primary">
 			<header className="flex items-center justify-between px-12 pt-7">
@@ -20,17 +22,23 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 					hookbuffer
 				</Link>
 				<nav className="flex items-center gap-7 text-[15px]">
-					{NAV.map((item) => (
+					{!landingOnly &&
+						NAV.map((item) => (
 						<Link key={item.to} to={item.to} className={cn('underline-offset-4 hover:underline', pathname === item.to ? 'font-semibold' : 'text-cobalt-muted')}>
-							{item.label}
-						</Link>
-					))}
-					<Link to="/login" className="text-cobalt-muted underline-offset-4 hover:underline">
-						로그인
-					</Link>
-					<Link to="/login" className={buttonVariants({ size: 'lg' })}>
-						시작하기
-					</Link>
+								{item.label}
+							</Link>
+						))}
+					{/* 랜딩만 공개하는 배포에서는 메뉴·로그인·시작하기를 아예 두지 않는다 */}
+					{!landingOnly && (
+						<>
+							<Link to="/login" className="text-cobalt-muted underline-offset-4 hover:underline">
+								로그인
+							</Link>
+							<Link to="/login" className={buttonVariants({ size: 'lg' })}>
+								시작하기
+							</Link>
+						</>
+					)}
 				</nav>
 			</header>
 

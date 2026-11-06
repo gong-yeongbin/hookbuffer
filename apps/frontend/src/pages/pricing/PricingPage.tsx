@@ -3,6 +3,7 @@ import { CheckIcon } from 'lucide-react';
 import { Link } from 'react-router';
 import { Faq } from '@/components/Faq';
 import { buttonVariants } from '@/components/ui/button';
+import { useLandingOnly } from '@/config';
 import { PublicLayout } from '@/layout/PublicLayout';
 
 // 값은 plan.md 결정 11과 백엔드 plan-limits.ts와 같다. 바꾸면 셋을 같이 바꾼다.
@@ -17,6 +18,7 @@ const PLANS = [
 const INCLUDED = ['자동 재시도 무료', '서명 검증', '대시보드에서 재전송', '내부망 주소 차단'];
 
 export function PricingPage() {
+	const landingOnly = useLandingOnly();
 	return (
 		<PublicLayout>
 			<section className="px-12 pt-[96px]">
@@ -37,9 +39,15 @@ export function PricingPage() {
 									<li key={row}>{row}</li>
 								))}
 							</ul>
-							<Link to="/login" className={cn(buttonVariants({ size: 'lg' }), 'mt-7 w-full')}>
-								시작하기
-							</Link>
+							{landingOnly ? (
+								<span aria-disabled className={cn(buttonVariants({ size: 'lg' }), 'mt-7 w-full pointer-events-none opacity-60')}>
+									준비 중
+								</span>
+							) : (
+								<Link to="/login" className={cn(buttonVariants({ size: 'lg' }), 'mt-7 w-full')}>
+									시작하기
+								</Link>
+							)}
 						</div>
 					))}
 				</div>
