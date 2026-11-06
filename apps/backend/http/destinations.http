@@ -20,7 +20,7 @@ Content-Type: application/json
 	"url": "https://api.example.com/webhooks",
 	"headers": {
 		"Authorization": "Bearer my-server-token",
-		"X-Source": "relaydam"
+		"X-Source": "hookbuffer"
 	},
 	"timeout_ms": 3000
 }

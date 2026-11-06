@@ -1,4 +1,4 @@
-# dam (저장소 hookbuffer, 패키지 relaydam)
+# hookbuffer (패키지·헤더 접두사는 hookbuffer)
 
 웹훅 수신 게이트웨이. pnpm + Turborepo 모노레포. `apps/backend`(NestJS), `apps/frontend`(React),
 `packages/{eslint-config,typescript-config}`.

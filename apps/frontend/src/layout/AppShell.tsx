@@ -74,8 +74,8 @@ export function AppShell() {
 	return (
 		<div className="flex min-h-screen">
 			<aside aria-label="주 메뉴" className="flex w-14 shrink-0 flex-col items-center border-r py-3">
-				<Link to="/app" aria-label="dam 홈" className="font-heading text-xl font-bold text-primary">
-					d
+				<Link to="/app" aria-label="hookbuffer 홈" className="font-heading text-xl font-bold text-primary">
+					h
 				</Link>
 				<nav className="mt-5 flex flex-col">
 					{MENU.map((item) => (

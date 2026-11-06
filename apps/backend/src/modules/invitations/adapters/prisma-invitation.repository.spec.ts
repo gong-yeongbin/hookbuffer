@@ -16,7 +16,7 @@ describe('PrismaInvitationRepository (통합)', () => {
 	let ownerId: number;
 	let ownerEmail: string;
 	let inviteeId: number;
-	const email = () => `${randomUUID()}@test.relaydam.local`;
+	const email = () => `${randomUUID()}@test.hookbuffer.local`;
 	const hash = () => randomUUID().replaceAll('-', '').padEnd(64, '0');
 
 	beforeAll(async () => {

@@ -31,5 +31,5 @@ export interface InvitationRepository {
 }
 
 export const INVITATION_REPOSITORY = Symbol('InvitationRepository');
-// 수락 링크의 프론트 주소. 예: https://app.relaydam.dev
+// 수락 링크의 프론트 주소. 예: https://app.hookbuffer.dev
 export const APP_URL = Symbol('AppUrl');

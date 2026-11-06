@@ -42,8 +42,8 @@ describe('destinations (e2e)', () => {
 	});
 
 	it('응답의 headers는 비밀 값이 가려지고 DB에는 암호문으로 저장된다', async () => {
-		const headers = { Authorization: 'Bearer real-server-token', 'X-Source': 'relaydam' };
-		const masked = { Authorization: 'Bearer ****', 'X-Source': 'relaydam' };
+		const headers = { Authorization: 'Bearer real-server-token', 'X-Source': 'hookbuffer' };
+		const masked = { Authorization: 'Bearer ****', 'X-Source': 'hookbuffer' };
 
 		const response = await create({ name: 'with headers', url: URL, headers, timeout_ms: 3000, concurrency: 2 }).expect(201);
 		const created = response.body as DestinationDto;
@@ -84,7 +84,7 @@ describe('destinations (e2e)', () => {
 		expect((await patch({ name: 'b', timeout_ms: 2000 }).expect(200)).body).toMatchObject({ name: 'b', url: URL, headers: { 'X-Api-Key': '****' }, timeout_ms: 2000, concurrency: 3 });
 		expect(await stored()).toBe(before);
 
-		expect(((await patch({ headers: { 'X-Source': 'relaydam' } }).expect(200)).body as DestinationDto).headers).toEqual({ 'X-Source': 'relaydam' });
+		expect(((await patch({ headers: { 'X-Source': 'hookbuffer' } }).expect(200)).body as DestinationDto).headers).toEqual({ 'X-Source': 'hookbuffer' });
 		expect(((await patch({ headers: null }).expect(200)).body as DestinationDto).headers).toEqual({});
 		expect(await stored()).toBeNull();
 		await patch({ timeout_ms: 31_000 }).expect(400);

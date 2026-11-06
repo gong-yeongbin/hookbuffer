@@ -86,7 +86,7 @@ describe('OrgSettingsPage', () => {
 		await u.click(await screen.findByRole('button', { name: '나가기' }));
 		expect(await screen.findByText('조직에서 나왔습니다.')).toBeDefined();
 		expect(await screen.findByRole('button', { name: /Google 계정으로 로그인/ })).toBeDefined();
-		expect(localStorage.getItem('relaydam.token')).toBeNull();
+		expect(localStorage.getItem('hookbuffer.token')).toBeNull();
 	});
 
 	it('실패는 백엔드 메시지로. 만료된 초대는 표시한다', async () => {
@@ -127,7 +127,7 @@ describe('MePage', () => {
 
 	it('내 이름·이메일·가입일을 보여주고 로그아웃한다', async () => {
 		renderApp('/app/me');
-		expect(await screen.findByText('seed@relaydam.local')).toBeDefined();
+		expect(await screen.findByText('seed@hookbuffer.local')).toBeDefined();
 		expect(screen.getByText('시드')).toBeDefined();
 		await user().click(screen.getByRole('button', { name: '로그아웃' }));
 		expect(await screen.findByRole('button', { name: /Google 계정으로 로그인/ })).toBeDefined();

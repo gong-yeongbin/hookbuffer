@@ -19,7 +19,7 @@ export function InvitationAcceptPage() {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-sand">
 			<div className="w-[420px] rounded-lg bg-card px-8 py-10 text-center text-card-foreground">
-				<p className="font-heading text-2xl font-bold tracking-tight text-primary">dam</p>
+				<p className="font-heading text-2xl font-bold tracking-tight text-primary">hookbuffer</p>
 				{accept.isPending && <p className="mt-6 text-muted-foreground">초대를 확인하는 중</p>}
 				{accept.isSuccess && (
 					<>

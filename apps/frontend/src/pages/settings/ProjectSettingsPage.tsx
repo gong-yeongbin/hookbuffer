@@ -86,7 +86,7 @@ function ProjectSettings() {
 
 			<section className="mt-4 rounded-lg bg-card p-5">
 				<h2 className="text-sm font-semibold">전달 서명 키</h2>
-				<p className="mt-1 text-sm text-muted-foreground">목적지로 보내는 요청의 X-Relaydam-Signature는 이 키로 계산한 본문의 HMAC-SHA256(base64)입니다. 고객 서버가 이 키로 검증하면 dam이 보낸 요청만 받을 수 있습니다.</p>
+				<p className="mt-1 text-sm text-muted-foreground">목적지로 보내는 요청의 X-Hookbuffer-Signature는 이 키로 계산한 본문의 HMAC-SHA256(base64)입니다. 고객 서버가 이 키로 검증하면 hookbuffer이 보낸 요청만 받을 수 있습니다.</p>
 				{isAdmin ? (
 					<div className="mt-3 flex items-center gap-2">
 						{secret ? (

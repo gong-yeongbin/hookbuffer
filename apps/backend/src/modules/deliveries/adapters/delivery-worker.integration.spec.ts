@@ -35,7 +35,7 @@ describe('전달 워커 (통합)', () => {
 	const queue = new ValkeyDeliveryQueue(valkey, keys);
 	const deliveries = new PrismaDeliveryRepository(prisma, cipher);
 	const guard = new ValkeyDestinationGuard(valkey);
-	const worker = new DeliveryWorker(deliveries, new NodeDestinationClient(config), queue, guard, 'https://app.relaydam.io');
+	const worker = new DeliveryWorker(deliveries, new NodeDestinationClient(config), queue, guard, 'https://app.hookbuffer.io');
 	const runner = new DeliveryRunner(worker, queue, deliveries);
 	// sweeper는 DB 전체에서 오래된 것을 찾는다. 같은 DB의 다른 데이터(개발용, 다른 테스트)가 이 테스트의 큐로
 	// 들어오지 않게, 이 테스트가 만든 delivery만 다시 넣는 runner를 따로 둔다
@@ -77,7 +77,7 @@ describe('전달 워커 (통합)', () => {
 				project_id: projectId,
 				source_id: source.id,
 				idempotency_key: `id:${randomUUID()}`,
-				headers: { 'content-type': 'application/json', 'x-toss-event': 'PAYMENT', host: 'api.relaydam.io' },
+				headers: { 'content-type': 'application/json', 'x-toss-event': 'PAYMENT', host: 'api.hookbuffer.io' },
 				body: new Uint8Array(BODY),
 				content_type: 'application/json',
 				size: BODY.length,
@@ -152,19 +152,19 @@ describe('전달 워커 (통합)', () => {
 			'content-type': 'application/json',
 			'x-toss-event': 'PAYMENT',
 			authorization: 'Bearer destination-token',
-			'x-relaydam-event-id': event.id.toString(),
-			'x-relaydam-delivery-id': delivery.id.toString(),
-			'x-relaydam-attempt-count': '1',
-			'x-relaydam-attempt-trigger': 'initial',
-			'x-relaydam-will-retry-after': '1',
-			'x-relaydam-event-url': `https://app.relaydam.io/orgs/${orgId}/projects/${projectId}/events/${event.id}`,
-			'x-relaydam-source-name': encodeURIComponent('토스 결제'),
-			'x-relaydam-destination-name': 'orders',
-			'x-relaydam-original-ip': '203.0.113.7',
-			'x-relaydam-verified': 'true',
+			'x-hookbuffer-event-id': event.id.toString(),
+			'x-hookbuffer-delivery-id': delivery.id.toString(),
+			'x-hookbuffer-attempt-count': '1',
+			'x-hookbuffer-attempt-trigger': 'initial',
+			'x-hookbuffer-will-retry-after': '1',
+			'x-hookbuffer-event-url': `https://app.hookbuffer.io/orgs/${orgId}/projects/${projectId}/events/${event.id}`,
+			'x-hookbuffer-source-name': encodeURIComponent('토스 결제'),
+			'x-hookbuffer-destination-name': 'orders',
+			'x-hookbuffer-original-ip': '203.0.113.7',
+			'x-hookbuffer-verified': 'true',
 		});
 		// 고객 서버가 하는 확인: project 서명 키로 받은 본문의 HMAC-SHA256을 계산해 비교한다
-		expect(got.headers['x-relaydam-signature']).toBe(createHmac('sha256', SECRET).update(got.body).digest('base64'));
+		expect(got.headers['x-hookbuffer-signature']).toBe(createHmac('sha256', SECRET).update(got.body).digest('base64'));
 		// 받은 host는 넘기지 않고 목적지의 것이다
 		expect(got.headers.host).toBe(base.replace('http://', ''));
 
@@ -211,9 +211,9 @@ describe('전달 워커 (통합)', () => {
 			[3, 'automatic', 500, 'boom'],
 		]);
 		expect(received).toHaveLength(3);
-		expect(received.map((r) => r.headers['x-relaydam-attempt-count'])).toEqual(['1', '2', '3']);
+		expect(received.map((r) => r.headers['x-hookbuffer-attempt-count'])).toEqual(['1', '2', '3']);
 		// 마지막 시도에는 다음 재시도 안내가 없다
-		expect(received[2]!.headers).not.toHaveProperty('x-relaydam-will-retry-after');
+		expect(received[2]!.headers).not.toHaveProperty('x-hookbuffer-will-retry-after');
 		expect(await valkey.zscore(keys.scheduled, delivery.id.toString())).toBeNull();
 	});
 
@@ -312,7 +312,7 @@ describe('전달 워커 (통합)', () => {
 		const after = await state(delivery.id);
 		expect(after).toMatchObject({ status: 'succeeded', attempt: 1 });
 		expect(after.attempts[0]).toMatchObject({ trigger: 'unpause' });
-		expect(received[0]!.headers['x-relaydam-attempt-trigger']).toBe('unpause');
+		expect(received[0]!.headers['x-hookbuffer-attempt-trigger']).toBe('unpause');
 	});
 
 	it('정지된 project의 delivery도 held로 둔다', async () => {
@@ -367,7 +367,7 @@ describe('전달 워커 (통합)', () => {
 		expect(stored).not.toBeNull();
 		const secret = cipher.decrypt(stored!);
 		expect(secret).toMatch(/^rdsec_/);
-		expect(received[0]!.headers['x-relaydam-signature']).toBe(createHmac('sha256', secret).update(BODY).digest('base64'));
+		expect(received[0]!.headers['x-hookbuffer-signature']).toBe(createHmac('sha256', secret).update(BODY).digest('base64'));
 	});
 
 	describe('목적지 보호', () => {
@@ -490,7 +490,7 @@ describe('전달 워커 (통합)', () => {
 
 	it('내부망 주소 목적지는 보내지 않고 blocked_address 실패로 기록한다(ALLOW_PRIVATE_DESTINATIONS가 true가 아님)', async () => {
 		// 가짜 목적지 서버가 127.0.0.1이라 평소 설정으로는 허용돼 있다. 차단이 켜진 client로 워커를 하나 더 둔다
-		const strict = new DeliveryWorker(deliveries, new NodeDestinationClient(new ConfigService({ ALLOW_PRIVATE_DESTINATIONS: 'false' })), queue, guard, 'https://app.relaydam.io');
+		const strict = new DeliveryWorker(deliveries, new NodeDestinationClient(new ConfigService({ ALLOW_PRIVATE_DESTINATIONS: 'false' })), queue, guard, 'https://app.hookbuffer.io');
 		const { delivery } = await setup();
 
 		expect(await strict.process({ delivery_id: delivery.id }, new Date(), 0.5)).toBe('failed');
@@ -571,7 +571,7 @@ describe('전달 워커 (통합)', () => {
 		await consume();
 
 		expect(await state(delivery.id)).toMatchObject({ status: 'succeeded' });
-		expect(received[0]!.headers).not.toHaveProperty('x-relaydam-source-name');
+		expect(received[0]!.headers).not.toHaveProperty('x-hookbuffer-source-name');
 		expect(sourceId).toBeGreaterThan(0);
 	});
 });

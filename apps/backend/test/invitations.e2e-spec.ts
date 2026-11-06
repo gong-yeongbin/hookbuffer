@@ -42,7 +42,7 @@ describe('invitations (e2e)', () => {
 	});
 
 	it('다른 이메일 계정으로 수락하면 403, 만료된 초대 수락은 404', async () => {
-		const address = `${randomUUID()}@test.relaydam.local`;
+		const address = `${randomUUID()}@test.hookbuffer.local`;
 		await invite(address).expect(201);
 		const stranger = await t.login();
 
@@ -66,9 +66,9 @@ describe('invitations (e2e)', () => {
 	it('member는 초대할 수 없다(403), 초대 취소는 204 후 404', async () => {
 		const member = await t.login();
 		await t.prisma.organization_member.create({ data: { organization_id: owner.org_id, user_id: member.user_id, role: 'member' } });
-		await t.http().post(invitations()).set(auth(member)).send({ email: 'x@test.relaydam.local', role: 'member' }).expect(403);
+		await t.http().post(invitations()).set(auth(member)).send({ email: 'x@test.hookbuffer.local', role: 'member' }).expect(403);
 
-		const created = (await invite(`${randomUUID()}@test.relaydam.local`).expect(201)).body as InvitationDto;
+		const created = (await invite(`${randomUUID()}@test.hookbuffer.local`).expect(201)).body as InvitationDto;
 		await t.http().delete(`${invitations()}/${created.id}`).set(auth(owner)).expect(204);
 		const gone = await t.http().delete(`${invitations()}/${created.id}`).set(auth(owner)).expect(404);
 		expect(errorOf(gone).code).toBe('invitation_not_found');
@@ -76,7 +76,7 @@ describe('invitations (e2e)', () => {
 
 	it('plan=free 조직의 초대 403 plan_limit', async () => {
 		const solo = await t.login();
-		const response = await t.http().post(`/orgs/${solo.org_id}/invitations`).set(auth(solo)).send({ email: 'x@test.relaydam.local', role: 'member' }).expect(403);
+		const response = await t.http().post(`/orgs/${solo.org_id}/invitations`).set(auth(solo)).send({ email: 'x@test.hookbuffer.local', role: 'member' }).expect(403);
 		expect(errorOf(response).code).toBe('plan_limit');
 	});
 
@@ -84,6 +84,6 @@ describe('invitations (e2e)', () => {
 		const lead = await t.login();
 		await t.prisma.organization.update({ where: { id: lead.org_id }, data: { plan: 'team' } });
 		const path = `/orgs/${lead.org_id}/invitations`;
-		for (let i = 0; i < 11; i++) await t.http().post(path).set(auth(lead)).send({ email: `${randomUUID()}@test.relaydam.local`, role: 'member' }).expect(201);
+		for (let i = 0; i < 11; i++) await t.http().post(path).set(auth(lead)).send({ email: `${randomUUID()}@test.hookbuffer.local`, role: 'member' }).expect(201);
 	});
 });

@@ -2,7 +2,7 @@ import { headersSchema, maskHeaders } from './headers';
 
 describe('headersSchema', () => {
 	it('이름 → 값 객체를 받는다. 빈 객체도 된다', () => {
-		expect(headersSchema.safeParse({ Authorization: 'Bearer t', 'X-Source': 'relaydam' }).success).toBe(true);
+		expect(headersSchema.safeParse({ Authorization: 'Bearer t', 'X-Source': 'hookbuffer' }).success).toBe(true);
 		expect(headersSchema.safeParse({}).success).toBe(true);
 	});
 
@@ -26,7 +26,7 @@ describe('maskHeaders', () => {
 				'x-webhook-secret': 's',
 				'X-Auth-Token': 't',
 				Cookie: 'sid=1',
-				'X-Source': 'relaydam',
+				'X-Source': 'hookbuffer',
 			}),
 		).toEqual({
 			Authorization: 'Bearer ****',
@@ -34,7 +34,7 @@ describe('maskHeaders', () => {
 			'x-webhook-secret': '****',
 			'X-Auth-Token': '****',
 			Cookie: '****',
-			'X-Source': 'relaydam',
+			'X-Source': 'hookbuffer',
 		});
 	});
 

@@ -3,7 +3,7 @@ import { createContext, type ReactNode, useContext, useState } from 'react';
 import { createProject, listOrgs, listProjects, type Org, type Project } from '@/api/projects';
 
 // 지금 보고 있는 프로젝트. 조직·프로젝트 목록을 한 번 읽고, 고른 프로젝트는 이 브라우저에 기억한다
-const KEY = 'relaydam.project';
+const KEY = 'hookbuffer.project';
 const remembered = () => {
 	try {
 		return localStorage.getItem(KEY);

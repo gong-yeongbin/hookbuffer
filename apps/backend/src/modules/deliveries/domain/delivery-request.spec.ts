@@ -49,7 +49,7 @@ describe('deliveryHeaders', () => {
 		attempt_count: 2,
 		trigger: 'automatic',
 		will_retry_after_sec: 600,
-		event_url: 'https://app.relaydam.io/orgs/1/projects/10/events/120',
+		event_url: 'https://app.hookbuffer.io/orgs/1/projects/10/events/120',
 		source_name: 'toss',
 		destination_name: 'orders',
 		original_ip: '203.0.113.7',
@@ -57,35 +57,35 @@ describe('deliveryHeaders', () => {
 		verified: true,
 	};
 
-	it('X-Relaydam-* 헤더 11개를 붙인다', () => {
+	it('X-Hookbuffer-* 헤더 11개를 붙인다', () => {
 		expect(deliveryHeaders({}, {}, meta)).toEqual({
-			'x-relaydam-event-id': '120',
-			'x-relaydam-delivery-id': '345',
-			'x-relaydam-attempt-count': '2',
-			'x-relaydam-attempt-trigger': 'automatic',
-			'x-relaydam-will-retry-after': '600',
-			'x-relaydam-event-url': 'https://app.relaydam.io/orgs/1/projects/10/events/120',
-			'x-relaydam-source-name': 'toss',
-			'x-relaydam-destination-name': 'orders',
-			'x-relaydam-original-ip': '203.0.113.7',
-			'x-relaydam-signature': 'c2lnbmF0dXJl',
-			'x-relaydam-verified': 'true',
+			'x-hookbuffer-event-id': '120',
+			'x-hookbuffer-delivery-id': '345',
+			'x-hookbuffer-attempt-count': '2',
+			'x-hookbuffer-attempt-trigger': 'automatic',
+			'x-hookbuffer-will-retry-after': '600',
+			'x-hookbuffer-event-url': 'https://app.hookbuffer.io/orgs/1/projects/10/events/120',
+			'x-hookbuffer-source-name': 'toss',
+			'x-hookbuffer-destination-name': 'orders',
+			'x-hookbuffer-original-ip': '203.0.113.7',
+			'x-hookbuffer-signature': 'c2lnbmF0dXJl',
+			'x-hookbuffer-verified': 'true',
 		});
 	});
 
 	it('마지막 시도면 will-retry-after가, 소스가 지워졌거나 IP가 없으면 그 헤더가 없다', () => {
 		const headers = deliveryHeaders({}, {}, { ...meta, will_retry_after_sec: null, source_name: null, original_ip: null, verified: false });
-		expect(headers).not.toHaveProperty('x-relaydam-will-retry-after');
-		expect(headers).not.toHaveProperty('x-relaydam-source-name');
-		expect(headers).not.toHaveProperty('x-relaydam-original-ip');
-		expect(headers['x-relaydam-verified']).toBe('false');
+		expect(headers).not.toHaveProperty('x-hookbuffer-will-retry-after');
+		expect(headers).not.toHaveProperty('x-hookbuffer-source-name');
+		expect(headers).not.toHaveProperty('x-hookbuffer-original-ip');
+		expect(headers['x-hookbuffer-verified']).toBe('false');
 	});
 
 	it('한글 이름은 URL 인코딩해 보낸다', () => {
 		const headers = deliveryHeaders({}, {}, { ...meta, source_name: '토스 결제', destination_name: '주문 서버' });
-		expect(headers['x-relaydam-source-name']).toBe(encodeURIComponent('토스 결제'));
-		expect(headers['x-relaydam-destination-name']).toBe(encodeURIComponent('주문 서버'));
-		expect(headers['x-relaydam-source-name']).toMatch(/^[\x20-\x7e]+$/);
+		expect(headers['x-hookbuffer-source-name']).toBe(encodeURIComponent('토스 결제'));
+		expect(headers['x-hookbuffer-destination-name']).toBe(encodeURIComponent('주문 서버'));
+		expect(headers['x-hookbuffer-source-name']).toMatch(/^[\x20-\x7e]+$/);
 	});
 
 	it('받은 헤더를 넘긴다. 전송 자체에 쓰이는 헤더는 넘기지 않는다', () => {
@@ -95,7 +95,7 @@ describe('deliveryHeaders', () => {
 				'x-hub-signature-256': 'sha256=abc',
 				'user-agent': 'GitHub-Hookshot/1',
 				'x-multi': ['a', 'b'],
-				host: 'api.relaydam.io',
+				host: 'api.hookbuffer.io',
 				'content-length': '11',
 				connection: 'keep-alive',
 				'transfer-encoding': 'chunked',
@@ -109,16 +109,16 @@ describe('deliveryHeaders', () => {
 		for (const name of ['host', 'content-length', 'connection', 'transfer-encoding', 'accept-encoding']) expect(headers).not.toHaveProperty(name);
 	});
 
-	it('겹치면 destination에 설정한 헤더가 받은 헤더를 이기고, X-Relaydam-*는 누구도 덮어쓰지 못한다', () => {
+	it('겹치면 destination에 설정한 헤더가 받은 헤더를 이기고, X-Hookbuffer-*는 누구도 덮어쓰지 못한다', () => {
 		const headers = deliveryHeaders(
-			{ authorization: 'Bearer from-sender', 'x-relaydam-signature': 'forged', 'x-source': 'sender' },
-			{ Authorization: 'Bearer destination-token', 'X-Relaydam-Verified': 'true' },
+			{ authorization: 'Bearer from-sender', 'x-hookbuffer-signature': 'forged', 'x-source': 'sender' },
+			{ Authorization: 'Bearer destination-token', 'X-Hookbuffer-Verified': 'true' },
 			{ ...meta, verified: false },
 		);
 
 		expect(headers.authorization).toBe('Bearer destination-token');
 		expect(headers['x-source']).toBe('sender');
-		expect(headers['x-relaydam-signature']).toBe('c2lnbmF0dXJl');
-		expect(headers['x-relaydam-verified']).toBe('false');
+		expect(headers['x-hookbuffer-signature']).toBe('c2lnbmF0dXJl');
+		expect(headers['x-hookbuffer-verified']).toBe('false');
 	});
 });

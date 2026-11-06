@@ -74,8 +74,8 @@ describe('DestinationService', () => {
 	});
 
 	it('응답의 headers는 비밀 값을 가리고, 저장소에는 원문이 간다', async () => {
-		const headers = { Authorization: 'Bearer real-token', 'X-Source': 'relaydam' };
-		const masked = { Authorization: 'Bearer ****', 'X-Source': 'relaydam' };
+		const headers = { Authorization: 'Bearer real-token', 'X-Source': 'hookbuffer' };
+		const masked = { Authorization: 'Bearer ****', 'X-Source': 'hookbuffer' };
 
 		const created = await service.create(PROJECT, { name: 'orders', url: URL, headers, timeout_ms: 3000 });
 		expect(created).toMatchObject({ headers: masked, timeout_ms: 3000 });

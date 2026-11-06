@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 // 랜딩에 올리는 실제 화면 조각. 대시보드와 같은 컴포넌트·같은 밀도(행 42px·본문 13px)로 그린다.
 // 데이터는 예시지만 숫자·상태는 제품이 실제로 내는 값만 쓴다
 
-export const SOURCE_URL = 'https://dam.example/in/9f3kq2x7wd1m';
+export const SOURCE_URL = 'https://hookbuffer.example/in/9f3kq2x7wd1m';
 
 const ROWS = [
 	{ at: '방금', source: 'toss-payments', req: 'POST /webhooks/pay', size: '1,204 B', status: 'pending' },

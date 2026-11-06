@@ -62,7 +62,7 @@ export class ProjectController {
 
 	@Roles('admin')
 	@Get(':projectId/signing-secret')
-	@ApiOperation({ summary: '전달 서명 키를 조회한다. 전달 요청의 X-Relaydam-Signature는 이 키로 계산한 본문의 HMAC-SHA256(base64)다' })
+	@ApiOperation({ summary: '전달 서명 키를 조회한다. 전달 요청의 X-Hookbuffer-Signature는 이 키로 계산한 본문의 HMAC-SHA256(base64)다' })
 	@ApiResponse({ status: 200, type: SigningSecretDto })
 	@ApiResponse({ status: 403, description: 'forbidden — admin 미만' })
 	@ApiResponse({ status: 404, description: 'project_not_found' })

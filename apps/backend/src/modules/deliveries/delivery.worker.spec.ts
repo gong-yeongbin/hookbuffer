@@ -26,7 +26,7 @@ class FakeDeliveries implements Pick<DeliveryRepository, 'load' | 'recordAttempt
 			query: '',
 			source_ip: '203.0.113.7',
 			verified: true,
-			headers: { 'content-type': 'application/json', host: 'api.relaydam.io', 'x-hub-signature-256': 'sha256=abc' },
+			headers: { 'content-type': 'application/json', host: 'api.hookbuffer.io', 'x-hub-signature-256': 'sha256=abc' },
 			body: BODY,
 			source_name: 'github',
 		},
@@ -126,7 +126,7 @@ describe('DeliveryWorker', () => {
 		client = new FakeClient();
 		queue = new FakeQueue();
 		guard = new FakeGuard();
-		worker = new DeliveryWorker(deliveries as unknown as DeliveryRepository, client, queue as unknown as DeliveryQueue, guard, 'https://app.relaydam.io');
+		worker = new DeliveryWorker(deliveries as unknown as DeliveryRepository, client, queue as unknown as DeliveryQueue, guard, 'https://app.hookbuffer.io');
 	});
 
 	describe('보내는 요청', () => {
@@ -138,24 +138,24 @@ describe('DeliveryWorker', () => {
 			expect(client.requests[0]).toMatchObject({ method: 'PUT', url: 'https://api.example.com/webhooks/orders/42?v=2', body: BODY, timeout_ms: 5000 });
 		});
 
-		it('받은 헤더와 destination 헤더를 넘기고 X-Relaydam-* 를 붙인다. 서명은 project 서명 키로 계산한 본문의 HMAC-SHA256(base64)이다', async () => {
+		it('받은 헤더와 destination 헤더를 넘기고 X-Hookbuffer-* 를 붙인다. 서명은 project 서명 키로 계산한 본문의 HMAC-SHA256(base64)이다', async () => {
 			await run();
 
 			expect(client.requests[0]!.headers).toEqual({
 				'content-type': 'application/json',
 				'x-hub-signature-256': 'sha256=abc',
 				authorization: 'Bearer token',
-				'x-relaydam-event-id': '120',
-				'x-relaydam-delivery-id': '345',
-				'x-relaydam-attempt-count': '1',
-				'x-relaydam-attempt-trigger': 'initial',
-				'x-relaydam-will-retry-after': '300',
-				'x-relaydam-event-url': 'https://app.relaydam.io/orgs/1/projects/10/events/120',
-				'x-relaydam-source-name': 'github',
-				'x-relaydam-destination-name': 'orders',
-				'x-relaydam-original-ip': '203.0.113.7',
-				'x-relaydam-signature': createHmac('sha256', 'rdsec_key').update(BODY).digest('base64'),
-				'x-relaydam-verified': 'true',
+				'x-hookbuffer-event-id': '120',
+				'x-hookbuffer-delivery-id': '345',
+				'x-hookbuffer-attempt-count': '1',
+				'x-hookbuffer-attempt-trigger': 'initial',
+				'x-hookbuffer-will-retry-after': '300',
+				'x-hookbuffer-event-url': 'https://app.hookbuffer.io/orgs/1/projects/10/events/120',
+				'x-hookbuffer-source-name': 'github',
+				'x-hookbuffer-destination-name': 'orders',
+				'x-hookbuffer-original-ip': '203.0.113.7',
+				'x-hookbuffer-signature': createHmac('sha256', 'rdsec_key').update(BODY).digest('base64'),
+				'x-hookbuffer-verified': 'true',
 			});
 		});
 
@@ -163,18 +163,18 @@ describe('DeliveryWorker', () => {
 			deliveries.delivery!.attempt = 1;
 			deliveries.delivery!.status = 'failed';
 			await run();
-			expect(client.requests[0]!.headers).toMatchObject({ 'x-relaydam-attempt-count': '2', 'x-relaydam-attempt-trigger': 'automatic', 'x-relaydam-will-retry-after': '600' });
+			expect(client.requests[0]!.headers).toMatchObject({ 'x-hookbuffer-attempt-count': '2', 'x-hookbuffer-attempt-trigger': 'automatic', 'x-hookbuffer-will-retry-after': '600' });
 
 			deliveries.delivery!.attempt = 9;
 			await run();
-			expect(client.requests[1]!.headers).toMatchObject({ 'x-relaydam-attempt-count': '10' });
-			expect(client.requests[1]!.headers).not.toHaveProperty('x-relaydam-will-retry-after');
+			expect(client.requests[1]!.headers).toMatchObject({ 'x-hookbuffer-attempt-count': '10' });
+			expect(client.requests[1]!.headers).not.toHaveProperty('x-hookbuffer-will-retry-after');
 		});
 
 		it('큐 항목에 사유가 적혀 있으면 그것을 쓴다 (수동 재시도, 일시 정지 해제)', async () => {
 			deliveries.delivery!.attempt = 3;
 			await run('manual');
-			expect(client.requests[0]!.headers['x-relaydam-attempt-trigger']).toBe('manual');
+			expect(client.requests[0]!.headers['x-hookbuffer-attempt-trigger']).toBe('manual');
 			expect(deliveries.attempts[0]!.trigger).toBe('manual');
 
 			await run('unpause');

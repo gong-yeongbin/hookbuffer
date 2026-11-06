@@ -12,6 +12,6 @@ export function configureApp(app: NestFastifyApplication): void {
 	app.useGlobalInterceptors(new BigIntInterceptor());
 	useRawIngressBody(app);
 
-	const document = SwaggerModule.createDocument(app, new DocumentBuilder().setTitle('relaydam').addBearerAuth().addSecurityRequirements('bearer').build());
+	const document = SwaggerModule.createDocument(app, new DocumentBuilder().setTitle('hookbuffer').addBearerAuth().addSecurityRequirements('bearer').build());
 	SwaggerModule.setup('docs', app, document);
 }

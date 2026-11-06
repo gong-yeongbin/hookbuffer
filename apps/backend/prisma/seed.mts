@@ -4,7 +4,7 @@ import { createCipheriv, randomBytes, randomInt } from 'node:crypto';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
-const SEED_EMAIL = 'seed@relaydam.local';
+const SEED_EMAIL = 'seed@hookbuffer.local';
 const SEED_TEAM = '시드 팀';
 const SEED_PROJECT = '시드 프로젝트';
 

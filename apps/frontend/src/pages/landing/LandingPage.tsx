@@ -10,7 +10,7 @@ import { PublicLayout } from '@/layout/PublicLayout';
 import { AttemptsFragment, EventsFragment, Panel, SOURCE_URL, SourceFragment } from './fragments';
 
 // 방향 "제품이 직접 동작"(context-notes 2026-10-28): 설명 대신 실제 화면 조각이 일한다.
-// 첫 화면은 제목 + 코발트 무대 위의 이벤트 화면. 무대 왼쪽 위는 댐 모양으로 깎는다(이 페이지의 유일한 장식)
+// 첫 화면은 제목 + 코발트 무대 위의 이벤트 화면. 무대 왼쪽 위 모서리를 계단형으로 깎는다(이 페이지의 유일한 장식)
 export function LandingPage() {
 	// 이미 로그인돼 있으면 대시보드로
 	if (getToken()) return <Navigate to="/app" replace />;
@@ -85,7 +85,7 @@ function HowItWorks() {
 					<EventsFragment rows={1} className="w-[504px]" />
 				</div>
 
-				<p className="mt-[88px] text-xl font-medium">이제 서버가 답할 때까지 dam이 보냅니다.</p>
+				<p className="mt-[88px] text-xl font-medium">이제 서버가 답할 때까지 hookbuffer이 보냅니다.</p>
 				<p className="mt-2 text-cobalt-muted">꺼져 있으면 기다렸다 다시 보내고, 시도마다 기록합니다.</p>
 			</div>
 			<div className="mt-4 ml-[calc(25%+56px)]">

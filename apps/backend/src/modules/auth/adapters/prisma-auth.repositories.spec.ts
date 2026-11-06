@@ -13,7 +13,7 @@ describe('Prisma auth 저장소 (통합)', () => {
 
 	function profile() {
 		const key = randomUUID();
-		return { sub: `sub-${key}`, email: `${key}@test.relaydam.local`, email_verified: true, name: '테스트', picture: null };
+		return { sub: `sub-${key}`, email: `${key}@test.hookbuffer.local`, email_verified: true, name: '테스트', picture: null };
 	}
 
 	afterAll(async () => {
@@ -45,7 +45,7 @@ describe('Prisma auth 저장소 (통합)', () => {
 
 	it('없는 sub·이메일·membership은 null', async () => {
 		expect(await accounts.findUserIdByGoogleSub('sub-none')).toBeNull();
-		expect(await accounts.findUserIdByEmail('none@test.relaydam.local')).toBeNull();
+		expect(await accounts.findUserIdByEmail('none@test.hookbuffer.local')).toBeNull();
 		expect(await memberships.findAccess(2147483647, 2147483647)).toBeNull();
 		expect(await memberships.projectInOrg(2147483647, 2147483647)).toBe(false);
 	});

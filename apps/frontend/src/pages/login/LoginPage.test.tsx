@@ -47,10 +47,10 @@ describe('LoginPage', () => {
 		vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
 		vi.stubEnv('VITE_DEV_TOKEN', 'token-from-env');
 		renderLogin();
-		expect(screen.getByRole('link', { name: 'dam' }).getAttribute('href')).toBe('/');
+		expect(screen.getByRole('link', { name: 'hookbuffer' }).getAttribute('href')).toBe('/');
 		expect(screen.getByText('처음이면 계정이 자동으로 만들어집니다')).toBeDefined();
 		fireEvent.click(screen.getByRole('button', { name: /Google 계정으로 로그인/ }));
-		expect(localStorage.getItem('relaydam.token')).toBe('token-from-env');
+		expect(localStorage.getItem('hookbuffer.token')).toBe('token-from-env');
 		expect(screen.getByText('대시보드')).toBeDefined();
 	});
 
@@ -59,7 +59,7 @@ describe('LoginPage', () => {
 		vi.stubEnv('VITE_DEV_TOKEN', '');
 		renderLogin();
 		fireEvent.click(screen.getByRole('button', { name: /Google 계정으로 로그인/ }));
-		expect(localStorage.getItem('relaydam.token')).toBe('dev');
+		expect(localStorage.getItem('hookbuffer.token')).toBe('dev');
 	});
 
 	it('클라이언트 ID가 있으면 구글 버튼을 그리고, 계정을 고르면 ID 토큰으로 로그인해 /app으로 간다', async () => {
@@ -76,7 +76,7 @@ describe('LoginPage', () => {
 		expect(await screen.findByText('Google 버튼')).toBeDefined();
 		expect(google.id.initialize).toHaveBeenCalledWith(expect.objectContaining({ client_id: 'client-123' }));
 		google.choose('google-id-token');
-		await waitFor(() => expect(localStorage.getItem('relaydam.token')).toBe('jwt-from-google'));
+		await waitFor(() => expect(localStorage.getItem('hookbuffer.token')).toBe('jwt-from-google'));
 		expect(posted[0]).toEqual({ id_token: 'google-id-token' });
 		expect(await screen.findByText('대시보드')).toBeDefined();
 	});
@@ -89,7 +89,7 @@ describe('LoginPage', () => {
 		await screen.findByText('Google 버튼');
 		google.choose('bad');
 		expect(await screen.findByRole('alert')).toHaveProperty('textContent', '구글 토큰이 올바르지 않습니다.');
-		expect(localStorage.getItem('relaydam.token')).toBeNull();
+		expect(localStorage.getItem('hookbuffer.token')).toBeNull();
 	});
 
 	it('이미 로그인돼 있으면 /app으로 보낸다', () => {

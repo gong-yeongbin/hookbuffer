@@ -43,7 +43,7 @@ const errorOf = (response: request.Response) => response.body as ErrorBody;
 
 function newGoogleUser(): string {
 	const key = randomUUID();
-	profiles.set(`google:${key}`, { sub: `sub-${key}`, email: `${key}@test.relaydam.local`, email_verified: true, name: 'e2e', picture: null });
+	profiles.set(`google:${key}`, { sub: `sub-${key}`, email: `${key}@test.hookbuffer.local`, email_verified: true, name: 'e2e', picture: null });
 	return `google:${key}`;
 }
 

@@ -156,7 +156,7 @@ model project {
   organization_id    Int
   name               String       @db.VarChar(100)
   suspended_at       DateTime?    @db.Timestamptz(3)
-  // 전달 요청에 찍는 서명(X-Relaydam-Signature)의 키. AES-256-GCM. 고객 서버가 확인하려면 알아야 해서
+  // 전달 요청에 찍는 서명(X-Hookbuffer-Signature)의 키. AES-256-GCM. 고객 서버가 확인하려면 알아야 해서
   // 업체 시크릿과 달리 조회·교체가 된다. 예전 project는 NULL이고 처음 쓸 때 만든다.
   signing_secret_enc String?      @db.Text
   created_at         DateTime     @default(now()) @db.Timestamptz(3)
@@ -277,9 +277,9 @@ model event {
   method          String   @default("POST") @db.VarChar(10)
   path            String   @default("") @db.Text
   query           String   @default("") @db.Text
-  // 보낸 쪽 IP. X-Relaydam-Original-Ip로 넘긴다
+  // 보낸 쪽 IP. X-Hookbuffer-Original-Ip로 넘긴다
   source_ip       String?  @db.VarChar(45)
-  // 받을 때 서명을 확인했는가. 서명 검증이 꺼진 소스로 받았으면 false. X-Relaydam-Verified로 넘긴다
+  // 받을 때 서명을 확인했는가. 서명 검증이 꺼진 소스로 받았으면 false. X-Hookbuffer-Verified로 넘긴다
   verified        Boolean  @default(false)
   headers         Json
   body            Bytes

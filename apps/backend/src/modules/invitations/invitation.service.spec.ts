@@ -89,7 +89,7 @@ describe('InvitationService', () => {
 			expect(created).toMatchObject({ email: 'kim@example.com', role: 'member', invited_by_user_id: 1 });
 			expect(created).not.toHaveProperty('token_hash');
 			expect(mailer.sent).toHaveLength(1);
-			expect(mailer.sent[0]).toMatchObject({ to: 'kim@example.com', subject: '[relaydam] 홍길동님이 결제팀에 초대했습니다' });
+			expect(mailer.sent[0]).toMatchObject({ to: 'kim@example.com', subject: '[hookbuffer] 홍길동님이 결제팀에 초대했습니다' });
 			expect(mailer.sent[0]!.text).toContain('https://app.test/invitations/');
 			expect(repo.rows[0]!.token_hash).toBe(hashInvitationToken(tokenOf(mailer.sent[0]!)));
 		});

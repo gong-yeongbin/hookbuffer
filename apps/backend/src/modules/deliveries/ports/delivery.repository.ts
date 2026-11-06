@@ -61,5 +61,5 @@ export interface DeliveryRepository {
 }
 
 export const DELIVERY_REPOSITORY = Symbol('DeliveryRepository');
-// X-Relaydam-Event-Url을 만들 대시보드 주소
+// X-Hookbuffer-Event-Url을 만들 대시보드 주소
 export const APP_URL = Symbol('AppUrl');

@@ -9,6 +9,6 @@ export class GoogleLoginDto {
 }
 
 export class AccessTokenDto {
-	@ApiProperty({ description: 'relaydam access JWT. 만료 7일. Authorization: Bearer로 보낸다', example: 'eyJhbGciOiJIUzI1NiIs...' })
+	@ApiProperty({ description: 'hookbuffer access JWT. 만료 7일. Authorization: Bearer로 보낸다', example: 'eyJhbGciOiJIUzI1NiIs...' })
 	access_token: string;
 }

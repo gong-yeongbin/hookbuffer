@@ -10,7 +10,7 @@ describe('PrismaUserRepository (통합)', () => {
 	let userId: number;
 
 	beforeAll(async () => {
-		const user = await prisma.user.create({ data: { email: `${randomUUID()}@test.relaydam.local`, name: '테스트' } });
+		const user = await prisma.user.create({ data: { email: `${randomUUID()}@test.hookbuffer.local`, name: '테스트' } });
 		userId = user.id;
 	});
 
