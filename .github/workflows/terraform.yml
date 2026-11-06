@@ -1,0 +1,82 @@
+# infra/frontend의 Terraform. PR이면 plan을 댓글로, main이면 apply.
+# AWS 키 없이 OIDC로 bootstrap이 만든 역할(TERRAFORM_ROLE_ARN)을 assume한다. 포크 PR은 OIDC 토큰이 없어 돌지 않는다
+name: terraform
+
+on:
+  pull_request:
+    paths: ["infra/frontend/**", ".github/workflows/terraform.yml"]
+  push:
+    branches: [main]
+    paths: ["infra/frontend/**", ".github/workflows/terraform.yml"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+# apply가 겹치지 않게 한 번에 하나만
+concurrency:
+  group: terraform-frontend
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: infra/frontend
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.TERRAFORM_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.10"
+
+      - run: terraform fmt -check -recursive
+        working-directory: infra
+
+      - run: terraform init -input=false -backend-config="bucket=${{ vars.TFSTATE_BUCKET }}"
+
+      - run: terraform validate
+
+      - name: plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -input=false -no-color -out=tfplan 2>&1 | tee plan.txt
+        continue-on-error: true
+
+      - name: plan 댓글
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          PLAN_OUTCOME: ${{ steps.plan.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const raw = fs.readFileSync('infra/frontend/plan.txt', 'utf8');
+            const plan = raw.length > 60000 ? raw.slice(0, 60000) + '\n…(잘림)' : raw;
+            const body = `### terraform plan (infra/frontend) — ${process.env.PLAN_OUTCOME}\n\n<details><summary>보기</summary>\n\n\`\`\`\n${plan}\n\`\`\`\n\n</details>`;
+            const { data: comments } = await github.rest.issues.listComments({ ...context.repo, issue_number: context.issue.number });
+            const mine = comments.find((c) => c.user.type === 'Bot' && c.body.startsWith('### terraform plan (infra/frontend)'));
+            if (mine) await github.rest.issues.updateComment({ ...context.repo, comment_id: mine.id, body });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+
+      - name: plan 실패면 중단
+        if: github.event_name == 'pull_request' && steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: apply
+        if: github.event_name != 'pull_request'
+        run: terraform apply -input=false -auto-approve
+
+      - name: outputs
+        if: github.event_name != 'pull_request'
+        run: terraform output

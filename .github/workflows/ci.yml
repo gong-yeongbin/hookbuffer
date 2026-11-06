@@ -1,0 +1,60 @@
+# 루트 CLAUDE.md "완료 기준"과 같은 명령을 돌린다. 백엔드 테스트는 postgres·valkey가 필요해 로컬 compose와 같은 태그로 띄운다
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: "1234"
+          POSTGRES_DB: hookbuffer
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hookbuffer"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      valkey:
+        image: valkey/valkey:9.1
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:1234@localhost:5432/hookbuffer
+      REDIS_URL: redis://localhost:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4 # 버전은 package.json#packageManager
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Prisma 클라이언트가 있어야 타입 검사·빌드가 된다
+      - run: pnpm db:generate
+
+      - run: pnpm lint
+      - run: pnpm check-types
+      - run: pnpm build
+
+      - run: pnpm db:deploy
+      - run: pnpm test
+      - run: pnpm --filter backend test:e2e

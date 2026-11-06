@@ -1,7 +1,8 @@
 # hookbuffer (패키지·헤더 접두사는 hookbuffer)
 
 웹훅 수신 게이트웨이. pnpm + Turborepo 모노레포. `apps/backend`(NestJS), `apps/frontend`(React),
-`packages/{eslint-config,typescript-config}`.
+`packages/{eslint-config,typescript-config}`, `infra/`(Terraform: `bootstrap`은 로컬에서 한 번, `frontend`는 GitHub Actions가 plan/apply),
+`.github/workflows/`(`ci.yml`·`terraform.yml`·`deploy-frontend.yml`).
 
 ## 문서
 
@@ -19,7 +20,7 @@
 
 ## 완료 기준
 
-루트에서 `pnpm lint && pnpm check-types && pnpm build && pnpm test`. lint는 경고 0.
+루트에서 `pnpm lint && pnpm check-types && pnpm build && pnpm test`. lint는 경고 0. `ci.yml`이 PR마다 같은 명령(+ 백엔드 e2e)을 돈다.
 통합·e2e는 `pnpm docker:up`(postgres 17 + valkey 9.1, 런타임은 Colima) 뒤에 실행한다.
 환경 변수를 추가하면 해당 앱의 `.env.example`과 루트 `turbo.json`의 `globalEnv`에 같이 넣는다.
 구현 변경에는 테스트가 같은 커밋에 따라온다. 무엇을 테스트할지는 `checklist.md`의 verify 항목,
