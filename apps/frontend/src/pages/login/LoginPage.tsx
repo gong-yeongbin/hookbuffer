@@ -43,7 +43,7 @@ export function LoginPage() {
 		<div className="flex min-h-screen items-center justify-center bg-sand">
 			<div className="w-[400px] rounded-lg bg-card px-8 py-10 text-center text-card-foreground">
 				<Link to="/" className="font-heading text-2xl font-bold tracking-tight text-primary">
-					hookbuffer
+					munjigi
 				</Link>
 				{CLIENT_ID ? (
 					<div ref={slot} aria-label="Google 계정으로 로그인" aria-busy={busy} className="mt-8 flex min-h-[44px] justify-center" />

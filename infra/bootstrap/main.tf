@@ -15,7 +15,7 @@ locals {
 # ── Terraform state ───────────────────────────────────────────────────────────
 
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "hookbuffer-tfstate-${local.account_id}"
+  bucket = "munjigi-tfstate-${local.account_id}"
 }
 
 resource "aws_s3_bucket_versioning" "tfstate" {
@@ -72,7 +72,7 @@ data "aws_iam_policy_document" "terraform_trust" {
 }
 
 resource "aws_iam_role" "terraform" {
-  name               = "hookbuffer-terraform"
+  name               = "munjigi-terraform"
   assume_role_policy = data.aws_iam_policy_document.terraform_trust.json
 }
 
@@ -86,7 +86,7 @@ data "aws_iam_policy_document" "terraform" {
   statement {
     sid       = "FrontendBuckets"
     actions   = ["s3:*"]
-    resources = ["arn:aws:s3:::hookbuffer-*", "arn:aws:s3:::hookbuffer-*/*"]
+    resources = ["arn:aws:s3:::munjigi-*", "arn:aws:s3:::munjigi-*/*"]
   }
   statement {
     sid       = "Edge"
@@ -100,7 +100,7 @@ data "aws_iam_policy_document" "terraform" {
       "iam:TagRole", "iam:UntagRole", "iam:ListRolePolicies", "iam:ListAttachedRolePolicies", "iam:ListInstanceProfilesForRole",
       "iam:PutRolePolicy", "iam:GetRolePolicy", "iam:DeleteRolePolicy",
     ]
-    resources = ["arn:aws:iam::${local.account_id}:role/hookbuffer-*"]
+    resources = ["arn:aws:iam::${local.account_id}:role/munjigi-*"]
   }
   statement {
     sid       = "ReadOidc"
@@ -110,7 +110,7 @@ data "aws_iam_policy_document" "terraform" {
 }
 
 resource "aws_iam_role_policy" "terraform" {
-  name   = "hookbuffer-terraform"
+  name   = "munjigi-terraform"
   role   = aws_iam_role.terraform.id
   policy = data.aws_iam_policy_document.terraform.json
 }

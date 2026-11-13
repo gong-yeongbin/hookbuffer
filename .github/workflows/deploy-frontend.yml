@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: production
-      url: https://hookbuffer.dev
+      url: https://munjigi.dev
     steps:
       - uses: actions/checkout@v4
 

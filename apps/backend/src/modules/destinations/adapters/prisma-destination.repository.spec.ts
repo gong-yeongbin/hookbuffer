@@ -57,7 +57,7 @@ describe('PrismaDestinationRepository (통합)', () => {
 	});
 
 	it('headers는 암호화해 저장하고 읽을 때 원문으로 돌려준다. 비우면 NULL', async () => {
-		const headers = { Authorization: 'Bearer real-token', 'X-Source': 'hookbuffer' };
+		const headers = { Authorization: 'Bearer real-token', 'X-Source': 'munjigi' };
 		const created = await destinations.create(projectId, { ...plain('with headers'), headers, timeout_ms: 3000 }, allow);
 		expect(created).toMatchObject({ headers, timeout_ms: 3000 });
 		const stored = async () => (await prisma.destination.findUniqueOrThrow({ where: { id: created.id } })).headers_enc;

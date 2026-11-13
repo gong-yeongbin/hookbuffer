@@ -43,7 +43,7 @@ export function nextAttemptAt(input: { rule: RetryRule; retriesDone: number; fir
 	return at - input.firstAttemptAt.getTime() > MAX_RETRY_WINDOW_MS ? null : new Date(at);
 }
 
-// 이번 시도가 실패하면 몇 초 뒤에 다시 보낼지(X-Hookbuffer-Will-Retry-After). 흩뜨리기 전의 값이다.
+// 이번 시도가 실패하면 몇 초 뒤에 다시 보낼지(X-Munjigi-Will-Retry-After). 흩뜨리기 전의 값이다.
 // 이번이 마지막 시도면 null
 export function willRetryAfterSec(rule: RetryRule, retriesDone: number): number | null {
 	if (retriesDone >= Math.min(rule.retry_count, MAX_RETRIES)) return null;

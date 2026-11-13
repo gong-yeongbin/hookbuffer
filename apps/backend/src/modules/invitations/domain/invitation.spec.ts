@@ -20,11 +20,11 @@ describe('invitation domain', () => {
 		const mail = invitationMail({
 			org_name: '결제팀',
 			inviter_name: '홍길동',
-			accept_url: 'https://app.hookbuffer.dev/invitations/tok',
+			accept_url: 'https://app.munjigi.dev/invitations/tok',
 			expires_at: new Date('2026-10-07T00:00:00Z'),
 		});
-		expect(mail.subject).toBe('[hookbuffer] 홍길동님이 결제팀에 초대했습니다');
-		expect(mail.text).toContain('https://app.hookbuffer.dev/invitations/tok');
+		expect(mail.subject).toBe('[munjigi] 홍길동님이 결제팀에 초대했습니다');
+		expect(mail.text).toContain('https://app.munjigi.dev/invitations/tok');
 		expect(mail.text).toContain('2026-10-07T00:00:00.000Z');
 	});
 });

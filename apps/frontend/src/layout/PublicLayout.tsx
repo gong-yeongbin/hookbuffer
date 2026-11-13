@@ -19,7 +19,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 		<div className="min-h-screen bg-sand text-primary">
 			<header className="flex items-center justify-between px-12 pt-7">
 				<Link to="/" className="font-heading text-2xl font-bold tracking-tight">
-					hookbuffer
+					munjigi
 				</Link>
 				<nav className="flex items-center gap-7 text-[15px]">
 					{!landingOnly &&
@@ -50,7 +50,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 				<a href="https://github.com/gong-yeongbin/hookbuffer" target="_blank" rel="noreferrer" className="text-primary underline-offset-4 hover:underline">
 					GitHub
 				</a>
-				<span className="text-right">© 2026 hookbuffer</span>
+				<span className="text-right">© 2026 munjigi</span>
 			</footer>
 		</div>
 	);

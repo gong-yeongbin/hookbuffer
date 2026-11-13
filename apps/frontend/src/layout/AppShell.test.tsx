@@ -42,7 +42,7 @@ describe('AppShell', () => {
 		const u = user();
 		await u.click(screen.getByRole('combobox', { name: '프로젝트' }));
 		await u.click(await screen.findByRole('option', { name: 'shop' }));
-		await waitFor(() => expect(localStorage.getItem('hookbuffer.project')).toBe('10'));
+		await waitFor(() => expect(localStorage.getItem('munjigi.project')).toBe('10'));
 	});
 
 	it('새 프로젝트를 고르면 만들기 창이 뜨고, 이름을 넣어 만들면 그 프로젝트가 선택된다', async () => {
@@ -53,7 +53,7 @@ describe('AppShell', () => {
 		expect(create.hasAttribute('disabled')).toBe(true);
 		await u.type(screen.getByLabelText('이름'), 'blog');
 		await u.click(create);
-		await waitFor(() => expect(localStorage.getItem('hookbuffer.project')).toBe('11'));
+		await waitFor(() => expect(localStorage.getItem('munjigi.project')).toBe('11'));
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 	});
 
@@ -86,7 +86,7 @@ describe('AppShell', () => {
 		const u = user();
 		await u.click(screen.getByRole('button', { name: '내 계정' }));
 		await u.click(await screen.findByRole('menuitem', { name: '로그아웃' }));
-		expect(localStorage.getItem('hookbuffer.token')).toBeNull();
+		expect(localStorage.getItem('munjigi.token')).toBeNull();
 		expect(await screen.findByRole('button', { name: /Google 계정으로 로그인/ })).toBeDefined();
 	});
 });

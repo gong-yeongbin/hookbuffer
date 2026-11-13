@@ -6,7 +6,7 @@ locals {
 }
 
 resource "aws_cloudfront_origin_access_control" "frontend" {
-  name                              = "hookbuffer-frontend"
+  name                              = "munjigi-frontend"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -14,7 +14,7 @@ resource "aws_cloudfront_origin_access_control" "frontend" {
 
 resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
-  comment             = "hookbuffer frontend"
+  comment             = "munjigi frontend"
   default_root_object = "index.html"
   aliases             = [var.domain, "www.${var.domain}"]
   is_ipv6_enabled     = true

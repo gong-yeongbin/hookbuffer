@@ -45,7 +45,7 @@ export async function createTestApp(): Promise<TestApp> {
 	// 새 구글 유저로 가입·로그인한다. org_id는 가입 때 생긴 개인 조직
 	async function login(): Promise<LoggedIn> {
 		const key = randomUUID();
-		const profile = { sub: `sub-${key}`, email: `${key}@test.hookbuffer.local`, email_verified: true, name: 'e2e', picture: 'https://example.com/a.png' };
+		const profile = { sub: `sub-${key}`, email: `${key}@test.munjigi.local`, email_verified: true, name: 'e2e', picture: 'https://example.com/a.png' };
 		profiles.set(`google:${key}`, profile);
 		emails.push(profile.email);
 		const response = await request(app.getHttpServer()).post('/auth/google').send({ id_token: `google:${key}` }).expect(200);
