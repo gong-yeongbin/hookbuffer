@@ -47,7 +47,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 			{/* 푸터 블록 없이 한 줄. 위는 비워 둔다 */}
 			<footer className="grid grid-cols-[1fr_auto_1fr] items-baseline px-12 pt-[30svh] pb-[30px] text-[15px] text-cobalt-muted">
 				<span>웹훅 수신 게이트웨이</span>
-				<a href="https://github.com/gong-yeongbin/hookbuffer" target="_blank" rel="noreferrer" className="text-primary underline-offset-4 hover:underline">
+				<a href="https://github.com/gong-yeongbin/munjigi" target="_blank" rel="noreferrer" className="text-primary underline-offset-4 hover:underline">
 					GitHub
 				</a>
 				<span className="text-right">© 2026 munjigi</span>

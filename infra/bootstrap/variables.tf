@@ -5,7 +5,7 @@ variable "region" {
 }
 
 variable "github_repo" {
-  description = "Terraform을 돌릴 수 있는 GitHub 저장소. OIDC sub가 immutable subject 형식이라 owner@ownerId/name@repoId로 쓴다(gh api repos/<o>/<r>/actions/oidc/customization/sub의 sub_claim_prefix). 저장소 이름이 바뀌어도 유효하다"
+  description = "Terraform을 돌릴 수 있는 GitHub 저장소. OIDC sub가 immutable subject 형식(repo:owner@ownerId/name@repoId:…)이라 이름 자리는 *로 두고 소유자 ID·저장소 ID에만 묶는다. 저장소나 소유자 이름이 바뀌어도 유효하다. ID는 gh api repos/<o>/<r> 의 owner.id·id"
   type        = string
-  default     = "gong-yeongbin@20896639/hookbuffer@1381437467"
+  default     = "*@20896639/*@1381437467"
 }
