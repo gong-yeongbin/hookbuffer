@@ -5,9 +5,9 @@ variable "region" {
 }
 
 variable "domain" {
-  description = "Route 53 호스팅 존이 있는 도메인. apex와 www를 CloudFront에 붙인다"
+  description = "Route 53 호스팅 존이 있는 도메인. 비우면 인증서·DNS 없이 *.cloudfront.net 주소로 연다. 넣으면 apex와 www를 CloudFront에 붙인다"
   type        = string
-  default     = "munjigi.dev"
+  default     = ""
 }
 
 variable "github_repo" {

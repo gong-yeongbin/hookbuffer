@@ -16,9 +16,10 @@ resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   comment             = "munjigi frontend"
   default_root_object = "index.html"
-  aliases             = [var.domain, "www.${var.domain}"]
-  is_ipv6_enabled     = true
-  http_version        = "http2and3"
+  # 도메인이 없으면 빈 집합. 그러면 *.cloudfront.net 주소만 받는다
+  aliases         = local.hosts
+  is_ipv6_enabled = true
+  http_version    = "http2and3"
   # 한국·일본·미국·유럽. 전 세계(PriceClass_All)보다 싸고 지연 차이는 없다
   price_class = "PriceClass_200"
 
@@ -59,9 +60,11 @@ resource "aws_cloudfront_distribution" "frontend" {
     }
   }
 
+  # 도메인이 없으면 CloudFront 기본 인증서(*.cloudfront.net). 있으면 us-east-1의 ACM 인증서를 SNI로 쓴다
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate_validation.frontend.certificate_arn
-    ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
+    cloudfront_default_certificate = !local.use_domain
+    acm_certificate_arn            = one(aws_acm_certificate_validation.frontend[*].certificate_arn)
+    ssl_support_method             = local.use_domain ? "sni-only" : null
+    minimum_protocol_version       = local.use_domain ? "TLSv1.2_2021" : null
   }
 }
