@@ -48,7 +48,7 @@ describe('NodeDestinationClient (통합)', () => {
 	it('요청 방식·경로·쿼리·헤더·본문을 준 그대로 보내고, 상태 코드와 응답 본문을 돌려준다', async () => {
 		const body = Buffer.from([0x7b, 0xff, 0xfe, 0x00, 0x7d]);
 		const result = await client.send(
-			request({ method: 'PUT', url: `${base}/webhooks/orders/42?v=2&tag=a%20b`, headers: { 'content-type': 'application/x-custom', 'x-hookbuffer-event-id': '120', 'x-multi': ['a', 'b'] }, body }),
+			request({ method: 'PUT', url: `${base}/webhooks/orders/42?v=2&tag=a%20b`, headers: { 'content-type': 'application/x-custom', 'x-munjigi-event-id': '120', 'x-multi': ['a', 'b'] }, body }),
 		);
 
 		expect(result).toMatchObject({ status_code: 200, response_body: '{"ok":true}', retry_after: undefined });
@@ -59,7 +59,7 @@ describe('NodeDestinationClient (통합)', () => {
 		expect(got.method).toBe('PUT');
 		expect(got.url).toBe('/webhooks/orders/42?v=2&tag=a%20b');
 		expect(got.body.equals(body)).toBe(true);
-		expect(got.headers).toMatchObject({ 'content-type': 'application/x-custom', 'x-hookbuffer-event-id': '120', 'x-multi': 'a, b', 'content-length': '5' });
+		expect(got.headers).toMatchObject({ 'content-type': 'application/x-custom', 'x-munjigi-event-id': '120', 'x-multi': 'a, b', 'content-length': '5' });
 	});
 
 	it('본문이 없는 DELETE도 보낸다', async () => {

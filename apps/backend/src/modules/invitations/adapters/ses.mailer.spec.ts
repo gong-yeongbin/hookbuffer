@@ -11,7 +11,7 @@ describe('SesMailer', () => {
 	it('SendEmail을 발신 주소·수신자·제목·본문(UTF-8)으로 한 번 호출한다', async () => {
 		ses.on(SendEmailCommand).resolves({ MessageId: 'm-1' });
 
-		await new SesMailer(new SESv2Client({ region: 'ap-northeast-2' }), 'no-reply@hookbuffer.dev').send({
+		await new SesMailer(new SESv2Client({ region: 'ap-northeast-2' }), 'no-reply@munjigi.dev').send({
 			to: 'kim@example.com',
 			subject: '초대',
 			text: 'https://app.test/invitations/tok',
@@ -20,7 +20,7 @@ describe('SesMailer', () => {
 		const calls = ses.commandCalls(SendEmailCommand);
 		expect(calls).toHaveLength(1);
 		expect(calls[0]!.args[0].input).toEqual({
-			FromEmailAddress: 'no-reply@hookbuffer.dev',
+			FromEmailAddress: 'no-reply@munjigi.dev',
 			Destination: { ToAddresses: ['kim@example.com'] },
 			Content: { Simple: { Subject: { Data: '초대', Charset: 'UTF-8' }, Body: { Text: { Data: 'https://app.test/invitations/tok', Charset: 'UTF-8' } } } },
 		});
@@ -28,7 +28,7 @@ describe('SesMailer', () => {
 
 	it('SES 오류는 그대로 던진다', async () => {
 		ses.on(SendEmailCommand).rejects(new Error('MessageRejected'));
-		const mailer = new SesMailer(new SESv2Client({ region: 'ap-northeast-2' }), 'no-reply@hookbuffer.dev');
+		const mailer = new SesMailer(new SESv2Client({ region: 'ap-northeast-2' }), 'no-reply@munjigi.dev');
 		await expect(mailer.send({ to: 'kim@example.com', subject: 's', text: 't' })).rejects.toThrow('MessageRejected');
 	});
 });

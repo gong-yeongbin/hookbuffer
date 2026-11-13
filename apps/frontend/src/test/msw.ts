@@ -37,9 +37,9 @@ export const CONNECTIONS: Connection[] = [
 	{ id: 2, source_id: 7, destination_id: 99, retry_strategy: 'linear', retry_interval_ms: 60000, retry_count: 3, paused_at: '2026-10-10T00:00:00.000Z', created_at: '2026-10-01T00:00:00.000Z', updated_at: '2026-10-10T00:00:00.000Z' },
 ];
 
-export const ME: Me = { id: 1, email: 'seed@hookbuffer.local', name: '시드', avatar_url: null, created_at: '2026-09-01T00:00:00.000Z', updated_at: '2026-09-01T00:00:00.000Z' };
+export const ME: Me = { id: 1, email: 'seed@munjigi.local', name: '시드', avatar_url: null, created_at: '2026-09-01T00:00:00.000Z', updated_at: '2026-09-01T00:00:00.000Z' };
 export const MEMBERS: Member[] = [
-	{ organization_id: 1, user_id: 1, role: 'owner', created_at: '2026-09-01T00:00:00.000Z', updated_at: '2026-09-01T00:00:00.000Z', user: { id: 1, email: 'seed@hookbuffer.local', name: '시드', avatar_url: null } },
+	{ organization_id: 1, user_id: 1, role: 'owner', created_at: '2026-09-01T00:00:00.000Z', updated_at: '2026-09-01T00:00:00.000Z', user: { id: 1, email: 'seed@munjigi.local', name: '시드', avatar_url: null } },
 	{ organization_id: 1, user_id: 2, role: 'member', created_at: '2026-09-05T00:00:00.000Z', updated_at: '2026-09-05T00:00:00.000Z', user: { id: 2, email: 'kim@company.com', name: '김개발', avatar_url: null } },
 ];
 export const INVITATIONS: Invitation[] = [{ id: 5, organization_id: 1, email: 'lee@company.com', role: 'member', expires_at: '2099-01-01T00:00:00.000Z', invited_by_user_id: 1, created_at: '2026-10-10T00:00:00.000Z', updated_at: '2026-10-10T00:00:00.000Z' }];

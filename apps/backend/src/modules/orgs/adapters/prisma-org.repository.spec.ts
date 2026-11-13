@@ -13,7 +13,7 @@ describe('PrismaOrgRepository (통합)', () => {
 	const org = (i: number) => orgIds[i]!;
 
 	beforeAll(async () => {
-		userId = (await prisma.user.create({ data: { email: `${randomUUID()}@test.hookbuffer.local`, name: '테스트' } })).id;
+		userId = (await prisma.user.create({ data: { email: `${randomUUID()}@test.munjigi.local`, name: '테스트' } })).id;
 		for (const role of ['owner', 'admin', 'member'] as const) {
 			const created = await prisma.organization.create({ data: { name: `조직-${role}`, members: { create: { user_id: userId, role } } } });
 			orgIds.push(created.id);

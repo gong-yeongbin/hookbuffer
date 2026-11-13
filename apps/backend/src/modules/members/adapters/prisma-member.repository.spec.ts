@@ -15,7 +15,7 @@ describe('PrismaMemberRepository (통합)', () => {
 	beforeAll(async () => {
 		orgId = (await prisma.organization.create({ data: { name: '멤버 테스트', plan: 'team' } })).id;
 		for (const role of ['owner', 'admin', 'member'] as const) {
-			const created = await prisma.user.create({ data: { email: `${randomUUID()}@test.hookbuffer.local`, name: role } });
+			const created = await prisma.user.create({ data: { email: `${randomUUID()}@test.munjigi.local`, name: role } });
 			await prisma.organization_member.create({ data: { organization_id: orgId, user_id: created.id, role } });
 			userIds.push(created.id);
 		}
@@ -35,7 +35,7 @@ describe('PrismaMemberRepository (통합)', () => {
 			[user(1), 'admin'],
 			[user(0), 'owner'],
 		]);
-		expect(all[0]!.user).toEqual({ id: user(2), email: expect.stringContaining('@test.hookbuffer.local') as string, name: 'member', avatar_url: null });
+		expect(all[0]!.user).toEqual({ id: user(2), email: expect.stringContaining('@test.munjigi.local') as string, name: 'member', avatar_url: null });
 
 		expect((await members.list(orgId, user(2), 1)).map((m) => m.user_id)).toEqual([user(1)]);
 	});

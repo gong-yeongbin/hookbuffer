@@ -20,10 +20,10 @@ jobs:
         image: postgres:17
         env:
           POSTGRES_PASSWORD: "1234"
-          POSTGRES_DB: hookbuffer
+          POSTGRES_DB: munjigi
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U postgres -d hookbuffer"
+          --health-cmd "pg_isready -U postgres -d munjigi"
           --health-interval 5s --health-timeout 5s --health-retries 10
       valkey:
         image: valkey/valkey:9.1
@@ -33,7 +33,7 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
 
     env:
-      DATABASE_URL: postgresql://postgres:1234@localhost:5432/hookbuffer
+      DATABASE_URL: postgresql://postgres:1234@localhost:5432/munjigi
       REDIS_URL: redis://localhost:6379
 
     steps:

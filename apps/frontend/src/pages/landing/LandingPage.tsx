@@ -94,7 +94,7 @@ function HowItWorks() {
 					<EventsFragment rows={1} className="w-[504px]" />
 				</div>
 
-				<p className="mt-[88px] text-xl font-medium">이제 서버가 답할 때까지 hookbuffer이 보냅니다.</p>
+				<p className="mt-[88px] text-xl font-medium">이제 서버가 답할 때까지 munjigi가 보냅니다.</p>
 				<p className="mt-2 text-cobalt-muted">꺼져 있으면 기다렸다 다시 보내고, 시도마다 기록합니다.</p>
 			</div>
 			<div className="mt-4 ml-[calc(25%+56px)]">

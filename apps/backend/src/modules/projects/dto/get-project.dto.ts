@@ -40,6 +40,6 @@ export class ProjectPageDto {
 }
 
 export class SigningSecretDto {
-	@ApiProperty({ description: '전달 서명 키. 고객 서버가 이 키로 본문의 HMAC-SHA256을 계산해 X-Hookbuffer-Signature와 비교한다', example: 'rdsec_3q2-7wEAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRo' })
+	@ApiProperty({ description: '전달 서명 키. 고객 서버가 이 키로 본문의 HMAC-SHA256을 계산해 X-Munjigi-Signature와 비교한다', example: 'rdsec_3q2-7wEAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRo' })
 	signing_secret: string;
 }

@@ -17,9 +17,9 @@ export function sameEmail(a: string, b: string): boolean {
 
 export function invitationMail(input: { org_name: string; inviter_name: string; accept_url: string; expires_at: Date }): { subject: string; text: string } {
 	return {
-		subject: `[hookbuffer] ${input.inviter_name}님이 ${input.org_name}에 초대했습니다`,
+		subject: `[munjigi] ${input.inviter_name}님이 ${input.org_name}에 초대했습니다`,
 		text: [
-			`${input.inviter_name}님이 hookbuffer 조직 "${input.org_name}"에 초대했습니다.`,
+			`${input.inviter_name}님이 munjigi 조직 "${input.org_name}"에 초대했습니다.`,
 			'',
 			`아래 링크에서 이 메일 주소의 구글 계정으로 로그인한 뒤 수락하세요.`,
 			input.accept_url,

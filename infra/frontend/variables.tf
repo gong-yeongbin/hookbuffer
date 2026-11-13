@@ -7,7 +7,7 @@ variable "region" {
 variable "domain" {
   description = "Route 53 호스팅 존이 있는 도메인. apex와 www를 CloudFront에 붙인다"
   type        = string
-  default     = "hookbuffer.dev"
+  default     = "munjigi.dev"
 }
 
 variable "github_repo" {

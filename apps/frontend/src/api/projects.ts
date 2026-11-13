@@ -11,6 +11,6 @@ export const updateProject = async (orgId: number, id: number, name: string) => 
 export const deleteProject = async (orgId: number, id: number) => {
 	await api.delete(`/orgs/${orgId}/projects/${id}`);
 };
-// 전달 서명 키. admin 이상만. 목적지가 X-Hookbuffer-Signature를 검증할 때 쓴다
+// 전달 서명 키. admin 이상만. 목적지가 X-Munjigi-Signature를 검증할 때 쓴다
 export const getSigningSecret = async (orgId: number, id: number) => (await api.get<{ signing_secret: string }>(`/orgs/${orgId}/projects/${id}/signing-secret`)).data.signing_secret;
 export const rotateSigningSecret = async (orgId: number, id: number) => (await api.post<{ signing_secret: string }>(`/orgs/${orgId}/projects/${id}/signing-secret/rotate`)).data.signing_secret;

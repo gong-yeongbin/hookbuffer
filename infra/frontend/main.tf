@@ -1,7 +1,7 @@
 # 정적 파일 버킷. 비공개이고 CloudFront(OAC)만 읽는다. 버저닝은 두지 않는다(배포마다 통째로 다시 올린다)
 
 resource "aws_s3_bucket" "frontend" {
-  bucket = "hookbuffer-frontend-${data.aws_caller_identity.current.account_id}"
+  bucket = "munjigi-frontend-${data.aws_caller_identity.current.account_id}"
 }
 
 resource "aws_s3_bucket_public_access_block" "frontend" {

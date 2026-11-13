@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "deploy_trust" {
 }
 
 resource "aws_iam_role" "deploy" {
-  name               = "hookbuffer-frontend-deploy"
+  name               = "munjigi-frontend-deploy"
   assume_role_policy = data.aws_iam_policy_document.deploy_trust.json
 }
 
@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "deploy" {
 }
 
 resource "aws_iam_role_policy" "deploy" {
-  name   = "hookbuffer-frontend-deploy"
+  name   = "munjigi-frontend-deploy"
   role   = aws_iam_role.deploy.id
   policy = data.aws_iam_policy_document.deploy.json
 }
