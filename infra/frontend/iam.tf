@@ -17,9 +17,9 @@ data "aws_iam_policy_document" "deploy_trust" {
       variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
     }
-    # GitHub environment를 쓰는 job의 sub 형식
+    # GitHub environment를 쓰는 job의 sub 형식. github_repo에 와일드카드(이름 자리 *)가 있어 StringLike
     condition {
-      test     = "StringEquals"
+      test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values   = ["repo:${var.github_repo}:environment:production"]
     }
