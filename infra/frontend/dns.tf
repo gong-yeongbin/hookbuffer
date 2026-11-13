@@ -25,20 +25,19 @@ resource "aws_acm_certificate" "frontend" {
   }
 }
 
-resource "aws_route53_record" "acm_validation" {
-  for_each = {
-    for dvo in flatten(aws_acm_certificate.frontend[*].domain_validation_options) : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
+# 검증 레코드의 for_each 키는 도메인 이름(local.hosts, 변수에서 바로 안다)으로 두고 값만 인증서에서 찾는다.
+# domain_validation_options를 키로 쓰면 인증서가 없는 첫 plan에서 "apply 전엔 알 수 없다"며 거부된다
+locals {
+  acm_validation = local.use_domain ? { for dvo in aws_acm_certificate.frontend[0].domain_validation_options : dvo.domain_name => dvo } : {}
+}
 
+resource "aws_route53_record" "acm_validation" {
+  for_each        = local.hosts
   zone_id         = data.aws_route53_zone.root[0].zone_id
-  name            = each.value.name
-  type            = each.value.type
+  name            = local.acm_validation[each.key].resource_record_name
+  type            = local.acm_validation[each.key].resource_record_type
   ttl             = 60
-  records         = [each.value.record]
+  records         = [local.acm_validation[each.key].resource_record_value]
   allow_overwrite = true
 }
 
