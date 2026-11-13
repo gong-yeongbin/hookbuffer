@@ -102,6 +102,12 @@ data "aws_iam_policy_document" "terraform" {
     ]
     resources = ["arn:aws:iam::${local.account_id}:role/munjigi-*"]
   }
+  # data "aws_iam_openid_connect_provider"가 URL로 공급자를 찾을 때 List를 먼저 부른다. List는 리소스를 못 좁혀 *
+  statement {
+    sid       = "ListOidc"
+    actions   = ["iam:ListOpenIDConnectProviders"]
+    resources = ["*"]
+  }
   statement {
     sid       = "ReadOidc"
     actions   = ["iam:GetOpenIDConnectProvider"]
