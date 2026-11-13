@@ -50,6 +50,8 @@ jobs:
       - name: plan
         id: plan
         if: github.event_name == 'pull_request'
+        # tee 때문에 terraform의 종료 코드가 가려지지 않게 pipefail이 켜진 bash를 쓴다
+        shell: bash
         run: terraform plan -input=false -no-color -out=tfplan 2>&1 | tee plan.txt
         continue-on-error: true
 
