@@ -11,6 +11,10 @@ output "deploy_role_arn" {
   value = aws_iam_role.deploy.arn
 }
 
+output "cloudfront_domain" {
+  value = aws_cloudfront_distribution.frontend.domain_name
+}
+
 output "url" {
-  value = "https://${var.domain}"
+  value = local.use_domain ? "https://${var.domain}" : "https://${aws_cloudfront_distribution.frontend.domain_name}"
 }

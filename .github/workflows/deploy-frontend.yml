@@ -24,9 +24,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment:
-      name: production
-      url: https://munjigi.dev
+    environment: production
     steps:
       - uses: actions/checkout@v4
 
