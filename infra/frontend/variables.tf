@@ -11,7 +11,7 @@ variable "domain" {
 }
 
 variable "github_repo" {
-  description = "배포 역할을 assume할 수 있는 GitHub 저장소(owner/name)"
+  description = "배포 역할을 assume할 수 있는 GitHub 저장소. OIDC sub가 immutable subject 형식이라 owner@ownerId/name@repoId로 쓴다. bootstrap의 github_repo와 같은 값"
   type        = string
-  default     = "gong-yeongbin/hookbuffer"
+  default     = "gong-yeongbin@20896639/hookbuffer@1381437467"
 }
